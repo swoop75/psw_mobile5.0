@@ -28,6 +28,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_BASE_URL", "\"http://100.117.171.98:3003/api/v1/\""
         }
         debug {
             buildConfigField "String", "API_BASE_URL", "\"http://100.117.171.98:3003/api/v1/\""
