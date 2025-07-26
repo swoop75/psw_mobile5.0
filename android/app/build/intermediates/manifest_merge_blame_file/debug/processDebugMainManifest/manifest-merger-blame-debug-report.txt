@@ -27,7 +27,7 @@
 18-->[androidx.core:core:1.12.0] C:\Users\laoan\.gradle\caches\8.13\transforms\dd3b0aa5d87d6905dab310ec7234f871\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
 19
 20    <application
-20-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:8:5-32:19
+20-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:8:5-33:19
 21        android:name="com.psw.mobile.PSWApplication"
 21-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:9:9-39
 22        android:allowBackup="true"
@@ -44,36 +44,37 @@
 28-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:13:9-58
 29        android:label="@string/app_name"
 29-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:14:9-41
-30        android:roundIcon="@android:drawable/sym_def_app_icon"
-30-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:15:9-63
-31        android:supportsRtl="true"
-31-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:16:9-35
-32        android:testOnly="true"
+30        android:networkSecurityConfig="@xml/network_security_config"
+30-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:19:9-69
+31        android:roundIcon="@android:drawable/sym_def_app_icon"
+31-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:15:9-63
+32        android:supportsRtl="true"
+32-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:16:9-35
 33        android:theme="@style/Theme.PSWMobile"
 33-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:17:9-47
 34        android:usesCleartextTraffic="true" >
 34-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:18:9-44
 35        <activity
-35-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:21:9-31:20
+35-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:22:9-32:20
 36            android:name="com.psw.mobile.MainActivity"
-36-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:22:13-41
+36-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:23:13-41
 37            android:exported="true"
-37-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:23:13-36
+37-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:24:13-36
 38            android:label="@string/app_name"
-38-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:24:13-45
+38-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:25:13-45
 39            android:theme="@style/Theme.PSWMobile"
-39-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:25:13-51
+39-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:26:13-51
 40            android:windowSoftInputMode="adjustResize" >
-40-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:26:13-55
+40-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:27:13-55
 41            <intent-filter>
-41-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:27:13-30:29
+41-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:28:13-31:29
 42                <action android:name="android.intent.action.MAIN" />
-42-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:28:17-69
-42-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:28:25-66
+42-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:29:17-69
+42-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:29:25-66
 43
 44                <category android:name="android.intent.category.LAUNCHER" />
-44-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:29:17-77
-44-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:29:27-74
+44-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:30:17-77
+44-->C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\AndroidManifest.xml:30:27-74
 45            </intent-filter>
 46        </activity>
 47        <activity
