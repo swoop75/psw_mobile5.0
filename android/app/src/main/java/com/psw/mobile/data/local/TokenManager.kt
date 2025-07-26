@@ -4,14 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class TokenManager @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class TokenManager(private val context: Context) {
     companion object {
         private const val PREFS_NAME = "psw_secure_prefs"
         private const val TOKEN_KEY = "auth_token"
