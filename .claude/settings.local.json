@@ -14,7 +14,16 @@
       "Bash(gradle build)",
       "Bash(taskkill:*)",
       "Bash(tailscale:*)",
-      "Bash(gradlew.bat assembleRelease:*)"
+      "Bash(gradlew.bat assembleRelease:*)",
+      "Bash(.gradlew assembleDebug)",
+      "Bash(gradlew.bat assembleDebug:*)",
+      "Bash(cmd:*)",
+      "Bash(powershell:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(chmod:*)",
+      "Bash(\"C:/Users/laoan/AppData/Local/Android/Sdk/tools/gradle/gradle\" assembleDebug)",
+      "Bash(gradle:*)"
     ],
     "deny": []
   }
