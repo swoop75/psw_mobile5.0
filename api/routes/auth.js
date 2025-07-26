@@ -1,20 +1,9 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
-// Simple in-memory user store (replace with database in production)
-const users = [
-  {
-    id: 1,
-    username: 'admin',
-    password: '$2a$10$BXBe4gZaApKplqw.pwN6q.xAtdAkyw7gJq8yKPx4q0YJ4RuY/GNfm', // 'password123'
-    role: 'admin'
-  }
-];
-
-// Login
+// Simple login for testing
 router.post('/login', 
   [
     body('username').isLength({ min: 3 }).trim(),
@@ -29,38 +18,30 @@ router.post('/login',
 
       const { username, password } = req.body;
       
-      // Find user
-      const user = users.find(u => u.username === username);
-      if (!user) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+      // Simple check for testing
+      if (username === 'admin' && password === 'password123') {
+        const token = jwt.sign(
+          { 
+            userId: 1, 
+            username: 'admin',
+            role: 'admin' 
+          },
+          process.env.JWT_SECRET || 'default-secret',
+          { expiresIn: process.env.JWT_EXPIRE || '24h' }
+        );
+
+        res.json({
+          success: true,
+          token,
+          user: {
+            id: 1,
+            username: 'admin',
+            role: 'admin'
+          }
+        });
+      } else {
+        res.status(401).json({ error: 'Invalid credentials - UPDATED CODE' });
       }
-
-      // Check password (simplified for testing)
-      const isValid = password === 'password123' || await bcrypt.compare(password, user.password);
-      if (!isValid) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-
-      // Generate JWT
-      const token = jwt.sign(
-        { 
-          userId: user.id, 
-          username: user.username,
-          role: user.role 
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRE || '24h' }
-      );
-
-      res.json({
-        success: true,
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          role: user.role
-        }
-      });
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ error: 'Login failed' });
@@ -77,19 +58,14 @@ router.get('/verify', async (req, res) => {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = users.find(u => u.id === decoded.userId);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret');
     
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-
     res.json({
       success: true,
       user: {
-        id: user.id,
-        username: user.username,
-        role: user.role
+        id: decoded.userId,
+        username: decoded.username,
+        role: decoded.role
       }
     });
   } catch (error) {
@@ -106,21 +82,16 @@ router.post('/refresh', async (req, res) => {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = users.find(u => u.id === decoded.userId);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret');
     
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-
     // Generate new token
     const newToken = jwt.sign(
       { 
-        userId: user.id, 
-        username: user.username,
-        role: user.role 
+        userId: decoded.userId, 
+        username: decoded.username,
+        role: decoded.role 
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'default-secret',
       { expiresIn: process.env.JWT_EXPIRE || '24h' }
     );
 
