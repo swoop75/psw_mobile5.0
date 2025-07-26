@@ -53,10 +53,7 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = username,
-            onValueChange = { 
-                username = it
-                errorMessage = ""
-            },
+            onValueChange = { username = it },
             label = { Text("Username") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -66,10 +63,7 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = password,
-            onValueChange = { 
-                password = it
-                errorMessage = ""
-            },
+            onValueChange = { password = it },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
