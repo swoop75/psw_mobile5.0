@@ -152,6 +152,7 @@ fun DashboardScreen(
                         }
                     }
                     is DashboardUiState.Error -> {
+                        val errorState = uiState as DashboardUiState.Error
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -166,7 +167,7 @@ fun DashboardScreen(
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    text = uiState.message,
+                                    text = errorState.message,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(top = 4.dp)
