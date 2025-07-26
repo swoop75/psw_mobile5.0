@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,41 +14,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-data class Company(
-    val id: String,
-    val name: String,
-    val industry: String,
-    val location: String,
-    val status: String
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.psw.mobile.viewmodel.MasterlistViewModel
+import com.psw.mobile.viewmodel.MasterlistUiState
+import com.psw.mobile.data.model.Company
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MasterlistScreen(
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    masterlistViewModel: MasterlistViewModel = viewModel()
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    
-    // Sample data - in real app, this would come from database
-    val companies = remember {
-        listOf(
-            Company("1", "Tech Solutions Inc", "Technology", "New York", "Active"),
-            Company("2", "Green Energy Corp", "Energy", "California", "Active"),
-            Company("3", "Healthcare Plus", "Healthcare", "Texas", "Pending"),
-            Company("4", "Manufacturing Pro", "Manufacturing", "Michigan", "Active"),
-            Company("5", "Finance First", "Finance", "Illinois", "Active"),
-            Company("6", "Retail Chain Ltd", "Retail", "Florida", "Inactive"),
-            Company("7", "Construction King", "Construction", "Nevada", "Active"),
-            Company("8", "Food & Beverage Co", "Food", "Oregon", "Pending")
-        )
-    }
-    
-    val filteredCompanies = companies.filter { 
-        it.name.contains(searchQuery, ignoreCase = true) ||
-        it.industry.contains(searchQuery, ignoreCase = true) ||
-        it.location.contains(searchQuery, ignoreCase = true)
-    }
+    val uiState by masterlistViewModel.uiState.collectAsState()
+    val searchQuery by masterlistViewModel.searchQuery.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -58,6 +37,11 @@ fun MasterlistScreen(
                 IconButton(onClick = onBackPressed) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                 }
+            },
+            actions = {
+                IconButton(onClick = { masterlistViewModel.loadCompanies() }) {
+                    Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                }
             }
         )
 
@@ -66,7 +50,7 @@ fun MasterlistScreen(
         ) {
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = { masterlistViewModel.updateSearchQuery(it) },
                 label = { Text("Search companies...") },
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = "Search")
@@ -76,18 +60,55 @@ fun MasterlistScreen(
                     .padding(bottom = 16.dp)
             )
 
-            Text(
-                text = "${filteredCompanies.size} companies found",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            when (uiState) {
+                is MasterlistUiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                is MasterlistUiState.Success -> {
+                    val companies = uiState.companies
+                    Text(
+                        text = "${companies.size} companies found",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(filteredCompanies) { company ->
-                    CompanyCard(company = company)
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(companies) { company ->
+                            CompanyCard(company = company)
+                        }
+                    }
+                }
+                is MasterlistUiState.Error -> {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Error loading companies",
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = uiState.message,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                        Button(
+                            onClick = { masterlistViewModel.loadCompanies() },
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            Text("Retry")
+                        }
+                    }
                 }
             }
         }

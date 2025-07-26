@@ -6,20 +6,35 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.psw.mobile.viewmodel.LoginViewModel
+import com.psw.mobile.viewmodel.LoginUiState
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    loginViewModel: LoginViewModel = viewModel()
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    
+    val uiState by loginViewModel.uiState.collectAsState()
+    
+    // Handle UI state changes
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is LoginUiState.Success -> {
+                onLoginSuccess()
+            }
+            else -> {}
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -63,35 +78,30 @@ fun LoginScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
-        if (errorMessage.isNotEmpty()) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+        // Show error message
+        when (uiState) {
+            is LoginUiState.Error -> {
+                Text(
+                    text = uiState.message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+            else -> {}
         }
 
         Button(
             onClick = {
                 if (username.isNotEmpty() && password.isNotEmpty()) {
-                    isLoading = true
-                    // Simple validation - in real app, check against database
-                    if (username == "admin" && password == "password") {
-                        onLoginSuccess()
-                    } else {
-                        errorMessage = "Invalid credentials"
-                        isLoading = false
-                    }
-                } else {
-                    errorMessage = "Please enter username and password"
+                    loginViewModel.login(username, password)
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            enabled = !isLoading
+            enabled = uiState !is LoginUiState.Loading && username.isNotEmpty() && password.isNotEmpty()
         ) {
-            if (isLoading) {
+            if (uiState is LoginUiState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     color = MaterialTheme.colorScheme.onPrimary

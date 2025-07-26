@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,14 +15,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.psw.mobile.viewmodel.DashboardViewModel
+import com.psw.mobile.viewmodel.DashboardUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     onNavigateToMasterlist: () -> Unit,
     onNavigateToNewCompanies: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    dashboardViewModel: DashboardViewModel = viewModel()
 ) {
+    val uiState by dashboardViewModel.uiState.collectAsState()
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -29,7 +35,13 @@ fun DashboardScreen(
         TopAppBar(
             title = { Text("PSW Dashboard") },
             actions = {
-                IconButton(onClick = onLogout) {
+                IconButton(onClick = { dashboardViewModel.loadDashboardStats() }) {
+                    Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                }
+                IconButton(onClick = {
+                    dashboardViewModel.logout()
+                    onLogout()
+                }) {
                     Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
                 }
             }
@@ -76,26 +88,83 @@ fun DashboardScreen(
 
             item {
                 // Quick Stats Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Quick Stats",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        )
-                        Row(
+                when (uiState) {
+                    is DashboardUiState.Loading -> {
+                        Card(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                         ) {
-                            StatItem("Total Companies", "150")
-                            StatItem("New This Week", "12")
-                            StatItem("Pending", "5")
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                    is DashboardUiState.Success -> {
+                        val stats = uiState.stats
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "Quick Stats",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.padding(bottom = 12.dp)
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    StatItem("Total Companies", stats.totalCompanies.toString())
+                                    StatItem("New This Week", stats.newThisWeek.toString())
+                                    StatItem("Pending", stats.pending.toString())
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    StatItem("Active", stats.active.toString())
+                                    StatItem("Inactive", stats.inactive.toString())
+                                }
+                            }
+                        }
+                    }
+                    is DashboardUiState.Error -> {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Error loading stats",
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = uiState.message,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                                Button(
+                                    onClick = { dashboardViewModel.loadDashboardStats() },
+                                    modifier = Modifier.padding(top = 8.dp)
+                                ) {
+                                    Text("Retry")
+                                }
+                            }
                         }
                     }
                 }
