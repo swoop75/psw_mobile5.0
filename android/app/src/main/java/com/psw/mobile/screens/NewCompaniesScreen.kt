@@ -99,6 +99,7 @@ fun NewCompaniesScreen(
                     }
                 }
                 is NewCompaniesUiState.Error -> {
+                    val errorState = uiState as NewCompaniesUiState.Error
                     Column(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -109,7 +110,7 @@ fun NewCompaniesScreen(
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = uiState.message,
+                            text = errorState.message,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp,
                             modifier = Modifier.padding(top = 4.dp)

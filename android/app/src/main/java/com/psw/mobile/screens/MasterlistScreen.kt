@@ -88,6 +88,7 @@ fun MasterlistScreen(
                     }
                 }
                 is MasterlistUiState.Error -> {
+                    val errorState = uiState as MasterlistUiState.Error
                     Column(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -98,7 +99,7 @@ fun MasterlistScreen(
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = uiState.message,
+                            text = errorState.message,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp,
                             modifier = Modifier.padding(top = 4.dp)
