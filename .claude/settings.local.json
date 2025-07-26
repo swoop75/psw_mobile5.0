@@ -12,7 +12,8 @@
       "Bash(rm:*)",
       "Bash(./gradlew:*)",
       "Bash(gradle build)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(tailscale:*)"
     ],
     "deny": []
   }

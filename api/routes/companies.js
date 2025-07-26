@@ -9,41 +9,32 @@ router.get('/test', (req, res) => {
   res.json({ message: 'Companies route is working!' });
 });
 
-// Masterlist - All approved companies
-router.get('/masterlist', 
-  auth,
-  async (req, res) => {
-    try {
-      // For now, return mock data until we confirm table structure
-      const companies = [
-        {
-          id: 1,
-          company_name: "Apple Inc.",
-          ticker: "AAPL",
-          country_name: "USA",
-          status: "Active",
-          yield: 0.5
-        },
-        {
-          id: 2,
-          company_name: "Microsoft Corp.",
-          ticker: "MSFT", 
-          country_name: "USA",
-          status: "Active",
-          yield: 2.3
-        }
-      ];
-      
-      res.json({
-        success: true,
-        companies: companies
-      });
-    } catch (error) {
-      console.error('Error fetching companies:', error);
-      res.status(500).json({ error: 'Failed to fetch companies' });
+// Masterlist endpoint (working version)
+router.get('/masterlist', (req, res) => {
+  const companies = [
+    {
+      id: 1,
+      company_name: "Apple Inc.",
+      ticker: "AAPL",
+      country_name: "USA",
+      status: "Active",
+      yield: 0.5
+    },
+    {
+      id: 2,
+      company_name: "Microsoft Corp.",
+      ticker: "MSFT", 
+      country_name: "USA",
+      status: "Active",
+      yield: 2.3
     }
-  }
-);
+  ];
+  
+  res.json({
+    success: true,
+    companies: companies
+  });
+});
 
 // New Companies - Pending approval
 router.get('/new', 

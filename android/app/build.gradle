@@ -30,7 +30,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            buildConfigField "String", "API_BASE_URL", "\"http://192.168.68.70:3002/api/v1/\""
+            buildConfigField "String", "API_BASE_URL", "\"http://100.120.9.63:3003/api/v1/\""
             applicationIdSuffix ".debug"
         }
     }
