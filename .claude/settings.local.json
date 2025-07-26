@@ -8,7 +8,8 @@
       "Bash(pkill:*)",
       "Bash(mkdir:*)",
       "Bash(ren:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
