@@ -1,2 +1,0 @@
-C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\java\com\psw\mobile\PSWApplication.kt
-C:\Users\laoan\Documents\GitHub\psw\psw_mobile5.0\android\app\src\main\java\com\psw\mobile\MainActivity.kt

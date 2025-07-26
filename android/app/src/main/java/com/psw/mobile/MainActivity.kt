@@ -3,19 +3,18 @@ package com.psw.mobile
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.psw.mobile.screens.LoginScreen
+import com.psw.mobile.screens.DashboardScreen
+import com.psw.mobile.screens.MasterlistScreen
+import com.psw.mobile.screens.NewCompaniesScreen
 import com.psw.mobile.ui.theme.PSWMobileTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    WelcomeScreen()
+                    PSWApp()
                 }
             }
         }
@@ -35,25 +34,56 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun WelcomeScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+fun PSWApp() {
+    val navController = rememberNavController()
+    var isLoggedIn by remember { mutableStateOf(false) }
+    
+    NavHost(
+        navController = navController,
+        startDestination = if (isLoggedIn) "dashboard" else "login"
     ) {
-        Text(
-            text = "🎉 PSW Mobile",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Text(
-            text = "Your first Android app is running!",
-            fontSize = 16.sp,
-            modifier = Modifier.padding(top = 16.dp),
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        composable("login") {
+            LoginScreen(
+                onLoginSuccess = {
+                    isLoggedIn = true
+                    navController.navigate("dashboard") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        composable("dashboard") {
+            DashboardScreen(
+                onNavigateToMasterlist = {
+                    navController.navigate("masterlist")
+                },
+                onNavigateToNewCompanies = {
+                    navController.navigate("new_companies")
+                },
+                onLogout = {
+                    isLoggedIn = false
+                    navController.navigate("login") {
+                        popUpTo("dashboard") { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        composable("masterlist") {
+            MasterlistScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable("new_companies") {
+            NewCompaniesScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }
