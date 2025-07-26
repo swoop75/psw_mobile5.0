@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <string name="app_name">PSW Mobile</string>
+    <style name="Theme.PSWMobile" parent="android:Theme.Material.DayNight.NoActionBar" ns1:targetApi="31">
+        <item name="android:statusBarColor">?android:attr/colorPrimaryVariant</item>
+    </style>
+</resources>
