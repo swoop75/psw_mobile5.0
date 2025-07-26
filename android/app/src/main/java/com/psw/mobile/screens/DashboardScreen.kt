@@ -445,32 +445,32 @@ fun BarChart(
                     size = Size(barWidth, barHeight)
                 )
                 
-                // Draw value on top of bar
-                drawContext.canvas.nativeCanvas.drawText(
-                    item.value.toInt().toString(),
-                    x + barWidth / 2,
-                    y - 10,
-                    android.graphics.Paint().apply {
-                        color = android.graphics.Color.BLACK
-                        textSize = 30f
-                        textAlign = android.graphics.Paint.Align.CENTER
-                    }
-                )
+                // Value will be shown in legend instead of on bars
             }
         }
         
-        // X-axis labels
+        // X-axis labels with values
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             data.forEach { item ->
-                Text(
-                    text = item.label,
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
-                )
+                ) {
+                    Text(
+                        text = item.value.toInt().toString(),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = item.label,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
