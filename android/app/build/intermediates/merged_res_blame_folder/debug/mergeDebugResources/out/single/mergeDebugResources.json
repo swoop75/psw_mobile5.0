@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.psw.mobile.app-debug-58:/xml_data_extraction_rules.xml.flat",
+        "source": "com.psw.mobile.app-main-60:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.psw.mobile.app-debug-58:/xml_backup_rules.xml.flat",
+        "source": "com.psw.mobile.app-main-60:/xml/backup_rules.xml"
+    }
+]
