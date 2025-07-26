@@ -4,68 +4,39 @@ const database = require('../config/database');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
-// Get all companies with optional filtering
-router.get('/', 
+// Test route
+router.get('/test', (req, res) => {
+  res.json({ message: 'Companies route is working!' });
+});
+
+// Masterlist - All approved companies
+router.get('/masterlist', 
   auth,
-  [
-    query('status').optional().isInt({ min: 1, max: 3 }),
-    query('country').optional().isLength({ min: 1, max: 100 }),
-    query('limit').optional().isInt({ min: 1, max: 100 }),
-    query('offset').optional().isInt({ min: 0 })
-  ],
   async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-
-      const { status, country, limit = 20, offset = 0 } = req.query;
-      
-      let sql = `
-        SELECT 
-          nc.new_company_id,
-          nc.company_name,
-          nc.ticker,
-          nc.isin,
-          nc.country_name,
-          nc.yield,
-          nc.inspiration,
-          nc.comments,
-          nc.borsdata_available,
-          ncs.status as company_status,
-          ci.country_name as country_full_name
-        FROM new_companies nc
-        LEFT JOIN new_companies_status ncs ON nc.new_companies_status_id = ncs.id
-        LEFT JOIN country_info ci ON nc.country_id = ci.id
-        WHERE 1=1
-      `;
-      
-      const params = [];
-      
-      if (status) {
-        sql += ' AND nc.new_companies_status_id = ?';
-        params.push(status);
-      }
-      
-      if (country) {
-        sql += ' AND (nc.country_name LIKE ? OR ci.country_name LIKE ?)';
-        params.push(`%${country}%`, `%${country}%`);
-      }
-      
-      sql += ' ORDER BY nc.new_company_id DESC LIMIT ? OFFSET ?';
-      params.push(parseInt(limit), parseInt(offset));
-
-      const companies = await database.query(sql, params);
+      // For now, return mock data until we confirm table structure
+      const companies = [
+        {
+          id: 1,
+          company_name: "Apple Inc.",
+          ticker: "AAPL",
+          country_name: "USA",
+          status: "Active",
+          yield: 0.5
+        },
+        {
+          id: 2,
+          company_name: "Microsoft Corp.",
+          ticker: "MSFT", 
+          country_name: "USA",
+          status: "Active",
+          yield: 2.3
+        }
+      ];
       
       res.json({
         success: true,
-        data: companies,
-        count: companies.length,
-        pagination: {
-          limit: parseInt(limit),
-          offset: parseInt(offset)
-        }
+        companies: companies
       });
     } catch (error) {
       console.error('Error fetching companies:', error);
@@ -74,41 +45,40 @@ router.get('/',
   }
 );
 
-// Get company by ID
-router.get('/:id', 
+// New Companies - Pending approval
+router.get('/new', 
   auth,
   async (req, res) => {
     try {
-      const { id } = req.params;
-      
-      const sql = `
-        SELECT 
-          nc.*,
-          ncs.status as company_status,
-          ci.country_name as country_full_name,
-          b.broker_name,
-          psg.strategy_group_name
-        FROM new_companies nc
-        LEFT JOIN new_companies_status ncs ON nc.new_companies_status_id = ncs.id
-        LEFT JOIN country_info ci ON nc.country_id = ci.id
-        LEFT JOIN brokers b ON nc.broker_id = b.broker_id
-        LEFT JOIN portfolio_strategy_groups psg ON nc.strategy_group_id = psg.strategy_group_id
-        WHERE nc.new_company_id = ?
-      `;
-      
-      const companies = await database.query(sql, [id]);
-      
-      if (companies.length === 0) {
-        return res.status(404).json({ error: 'Company not found' });
-      }
+      // For now, return mock data until we confirm table structure
+      const companies = [
+        {
+          id: 1,
+          company_name: "Tesla Inc.",
+          ticker: "TSLA",
+          country_name: "USA",
+          status: "Pending",
+          yield: 0.0,
+          date_added: "2024-01-20"
+        },
+        {
+          id: 2,
+          company_name: "NVIDIA Corp.",
+          ticker: "NVDA", 
+          country_name: "USA",
+          status: "Pending",
+          yield: 0.1,
+          date_added: "2024-01-19"
+        }
+      ];
       
       res.json({
         success: true,
-        data: companies[0]
+        companies: companies
       });
     } catch (error) {
-      console.error('Error fetching company:', error);
-      res.status(500).json({ error: 'Failed to fetch company' });
+      console.error('Error fetching new companies:', error);
+      res.status(500).json({ error: 'Failed to fetch new companies' });
     }
   }
 );
@@ -126,7 +96,7 @@ router.get('/stats/summary',
           COUNT(CASE WHEN borsdata_available = 1 THEN 1 END) as borsdata_available,
           AVG(CASE WHEN yield IS NOT NULL AND yield > 0 THEN yield END) as avg_yield
         FROM new_companies
-      `);
+      `, [], 'foundation');
       
       const countryStats = await database.query(`
         SELECT country_name, COUNT(*) as count
@@ -134,7 +104,7 @@ router.get('/stats/summary',
         WHERE country_name IS NOT NULL 
         GROUP BY country_name 
         ORDER BY count DESC
-      `);
+      `, [], 'foundation');
       
       res.json({
         success: true,
@@ -149,5 +119,7 @@ router.get('/stats/summary',
     }
   }
 );
+
+// TEMPORARILY REMOVED /:id route to test other routes
 
 module.exports = router;

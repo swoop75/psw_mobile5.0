@@ -3,6 +3,28 @@ const database = require('../config/database');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
+// Dashboard stats for mobile app
+router.get('/stats', auth, async (req, res) => {
+  try {
+    // For now, return mock data until we confirm table structure
+    const stats = {
+      totalCompanies: 150,
+      active: 120,
+      inactive: 25,
+      pending: 5,
+      newThisWeek: 8
+    };
+    
+    res.json({
+      success: true,
+      stats: stats
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+  }
+});
+
 // Dashboard overview
 router.get('/overview', auth, async (req, res) => {
   try {
@@ -20,7 +42,7 @@ router.get('/overview', auth, async (req, res) => {
       LEFT JOIN new_companies_status ncs ON nc.new_companies_status_id = ncs.id
       ORDER BY nc.new_company_id DESC 
       LIMIT 5
-    `);
+    `, [], 'foundation');
 
     // Get summary statistics
     const summaryStats = await database.query(`
@@ -31,7 +53,7 @@ router.get('/overview', auth, async (req, res) => {
         AVG(CASE WHEN yield IS NOT NULL AND yield > 0 THEN yield END) as avg_yield,
         MAX(yield) as max_yield
       FROM new_companies
-    `);
+    `, [], 'foundation');
 
     // Get top countries by company count
     const topCountries = await database.query(`
@@ -43,14 +65,14 @@ router.get('/overview', auth, async (req, res) => {
       GROUP BY country_name 
       ORDER BY company_count DESC 
       LIMIT 5
-    `);
+    `, [], 'foundation');
 
     // Get companies added this week
     const weeklyAdditions = await database.query(`
       SELECT COUNT(*) as count
       FROM new_companies 
       WHERE created >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-    `);
+    `, [], 'foundation');
 
     res.json({
       success: true,
@@ -78,7 +100,7 @@ router.get('/charts', auth, async (req, res) => {
       FROM new_companies nc
       LEFT JOIN new_companies_status ncs ON nc.new_companies_status_id = ncs.id
       GROUP BY ncs.status
-    `);
+    `, [], 'foundation');
 
     // Companies by country
     const countryChart = await database.query(`
@@ -89,7 +111,7 @@ router.get('/charts', auth, async (req, res) => {
       WHERE country_name IS NOT NULL 
       GROUP BY country_name 
       ORDER BY count DESC
-    `);
+    `, [], 'foundation');
 
     // Yield distribution
     const yieldChart = await database.query(`
@@ -114,7 +136,7 @@ router.get('/charts', auth, async (req, res) => {
           WHEN '6-8%' THEN 4
           WHEN '8%+' THEN 5
         END
-    `);
+    `, [], 'foundation');
 
     res.json({
       success: true,
