@@ -1,10 +1,10 @@
 [
     {
-        "merged": "com.psw.mobile.app-debug-53:/xml_backup_rules.xml.flat",
-        "source": "com.psw.mobile.app-main-55:/xml/backup_rules.xml"
+        "merged": "com.psw.mobile.app-debug-54:/xml_data_extraction_rules.xml.flat",
+        "source": "com.psw.mobile.app-main-56:/xml/data_extraction_rules.xml"
     },
     {
-        "merged": "com.psw.mobile.app-debug-53:/xml_data_extraction_rules.xml.flat",
-        "source": "com.psw.mobile.app-main-55:/xml/data_extraction_rules.xml"
+        "merged": "com.psw.mobile.app-debug-54:/xml_backup_rules.xml.flat",
+        "source": "com.psw.mobile.app-main-56:/xml/backup_rules.xml"
     }
 ]

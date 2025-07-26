@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.psw.mobile.app-mergeDebugResources-51:/values-or/values-or.xml",
+            "outputFile": "com.psw.mobile.app-mergeDebugResources-52:/values-or/values-or.xml",
             "map": [
                 {
                     "source": "C:\\Users\\laoan\\.gradle\\caches\\8.13\\transforms\\e2fbb805e7ba0a7a6a2a25f30fcf695d\\transformed\\jetified-ui-release\\res\\values-or\\values-or.xml",

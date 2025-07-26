@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.psw.mobile.app-mergeDebugResources-51:/values-ro/values-ro.xml",
+            "outputFile": "com.psw.mobile.app-mergeDebugResources-52:/values-ro/values-ro.xml",
             "map": [
                 {
                     "source": "C:\\Users\\laoan\\.gradle\\caches\\8.13\\transforms\\dd3b0aa5d87d6905dab310ec7234f871\\transformed\\core-1.12.0\\res\\values-ro\\values-ro.xml",

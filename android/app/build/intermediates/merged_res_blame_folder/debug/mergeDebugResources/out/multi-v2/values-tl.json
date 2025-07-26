@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.psw.mobile.app-mergeDebugResources-51:/values-tl/values-tl.xml",
+            "outputFile": "com.psw.mobile.app-mergeDebugResources-52:/values-tl/values-tl.xml",
             "map": [
                 {
                     "source": "C:\\Users\\laoan\\.gradle\\caches\\8.13\\transforms\\65d5755bb5081c25168b575f17daa194\\transformed\\jetified-material3-1.1.2\\res\\values-tl\\values-tl.xml",
