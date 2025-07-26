@@ -4,7 +4,7 @@
             "outputFile": "com.psw.mobile.app-mergeDebugResources-51:/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\laoan\\.gradle\\caches\\8.13\\transforms\\168cfb4b7b99828e2de159494ed48cc0\\transformed\\core-1.12.0\\res\\values-v16\\values-v16.xml",
+                    "source": "C:\\Users\\laoan\\.gradle\\caches\\8.13\\transforms\\dd3b0aa5d87d6905dab310ec7234f871\\transformed\\core-1.12.0\\res\\values-v16\\values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
