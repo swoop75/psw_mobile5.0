@@ -6,7 +6,9 @@
       "Bash(curl:*)",
       "Bash(node:*)",
       "Bash(pkill:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(ren:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
