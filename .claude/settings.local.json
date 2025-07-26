@@ -5,7 +5,8 @@
       "Bash(npm run dev:*)",
       "Bash(curl:*)",
       "Bash(node:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }
