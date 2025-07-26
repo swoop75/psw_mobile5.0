@@ -11,7 +11,8 @@
       "Bash(mv:*)",
       "Bash(rm:*)",
       "Bash(./gradlew:*)",
-      "Bash(gradle build)"
+      "Bash(gradle build)",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   }

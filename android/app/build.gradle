@@ -21,7 +21,6 @@ android {
         }
 
         // API Configuration
-        buildConfigField "String", "API_BASE_URL", "\"http://your-api-server.com/api/v1/\""
         buildConfigField "String", "API_TIMEOUT", "\"30\""
     }
 
@@ -31,7 +30,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            buildConfigField "String", "API_BASE_URL", "\"http://192.168.68.70:3000/api/v1/\""
+            buildConfigField "String", "API_BASE_URL", "\"http://192.168.68.70:3002/api/v1/\""
             applicationIdSuffix ".debug"
         }
     }

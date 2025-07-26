@@ -17,9 +17,10 @@ router.post('/login',
       }
 
       const { username, password } = req.body;
+      console.log('Login attempt:', { username, password });
       
       // Simple check for testing
-      if (username === 'admin' && password === 'password123') {
+      if (username === 'admin' && password === 'password') {
         const token = jwt.sign(
           { 
             userId: 1, 
