@@ -1,8 +1,12 @@
 package com.psw.mobile.screens
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Add
@@ -12,12 +16,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.psw.mobile.viewmodel.DashboardViewModel
 import com.psw.mobile.viewmodel.DashboardUiState
+import kotlin.math.cos
+import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,6 +182,101 @@ fun DashboardScreen(
                     }
                 }
             }
+
+            // Charts Section
+            if (uiState is DashboardUiState.Success) {
+                val stats = (uiState as DashboardUiState.Success).stats
+                
+                item {
+                    // Company Status Pie Chart
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Company Status Distribution",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                            PieChart(
+                                data = listOf(
+                                    PieChartData("Active", stats.active.toFloat(), Color(0xFF4CAF50)),
+                                    PieChartData("Inactive", stats.inactive.toFloat(), Color(0xFFF44336)),
+                                    PieChartData("Pending", stats.pending.toFloat(), Color(0xFFFF9800))
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    // Weekly Growth Bar Chart
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Weekly New Companies",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                            BarChart(
+                                data = listOf(
+                                    BarChartData("Mon", 5f),
+                                    BarChartData("Tue", 8f),
+                                    BarChartData("Wed", 3f),
+                                    BarChartData("Thu", 12f),
+                                    BarChartData("Fri", 7f),
+                                    BarChartData("Sat", 2f),
+                                    BarChartData("Sun", 1f)
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    // Recent Companies Table
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Recent Companies",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                            RecentCompaniesTable(
+                                companies = listOf(
+                                    CompanyTableData("Tech Corp", "Active", "2024-01-20"),
+                                    CompanyTableData("Green Energy", "Pending", "2024-01-19"),
+                                    CompanyTableData("Food Services", "Active", "2024-01-18"),
+                                    CompanyTableData("Digital Media", "Inactive", "2024-01-17"),
+                                    CompanyTableData("Healthcare Plus", "Active", "2024-01-16")
+                                )
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -231,5 +338,232 @@ fun StatItem(label: String, value: String) {
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+// Data classes for charts and tables
+data class PieChartData(val label: String, val value: Float, val color: Color)
+data class BarChartData(val label: String, val value: Float)
+data class CompanyTableData(val name: String, val status: String, val date: String)
+
+@Composable
+fun PieChart(
+    data: List<PieChartData>,
+    modifier: Modifier = Modifier
+) {
+    val total = data.sumOf { it.value.toDouble() }.toFloat()
+    
+    Row(modifier = modifier) {
+        // Pie chart
+        Canvas(
+            modifier = Modifier
+                .size(150.dp)
+                .weight(1f)
+        ) {
+            val radius = size.minDimension / 2 * 0.8f
+            val center = Offset(size.width / 2, size.height / 2)
+            var startAngle = 0f
+            
+            data.forEach { item ->
+                val sweepAngle = (item.value / total) * 360f
+                drawArc(
+                    color = item.color,
+                    startAngle = startAngle,
+                    sweepAngle = sweepAngle,
+                    useCenter = true,
+                    topLeft = Offset(
+                        center.x - radius,
+                        center.y - radius
+                    ),
+                    size = Size(radius * 2, radius * 2)
+                )
+                startAngle += sweepAngle
+            }
+        }
+        
+        // Legend
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 16.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            data.forEach { item ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(item.color, RoundedCornerShape(2.dp))
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = item.label,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = "${item.value.toInt()}",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BarChart(
+    data: List<BarChartData>,
+    modifier: Modifier = Modifier
+) {
+    val maxValue = data.maxOfOrNull { it.value } ?: 1f
+    
+    Column(modifier = modifier) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            val barWidth = size.width / data.size * 0.6f
+            val spacing = size.width / data.size * 0.4f
+            
+            data.forEachIndexed { index, item ->
+                val barHeight = (item.value / maxValue) * size.height * 0.8f
+                val x = index * (barWidth + spacing) + spacing / 2
+                val y = size.height - barHeight
+                
+                drawRect(
+                    color = Color(0xFF2196F3),
+                    topLeft = Offset(x, y),
+                    size = Size(barWidth, barHeight)
+                )
+                
+                // Draw value on top of bar
+                drawContext.canvas.nativeCanvas.drawText(
+                    item.value.toInt().toString(),
+                    x + barWidth / 2,
+                    y - 10,
+                    android.graphics.Paint().apply {
+                        color = android.graphics.Color.BLACK
+                        textSize = 30f
+                        textAlign = android.graphics.Paint.Align.CENTER
+                    }
+                )
+            }
+        }
+        
+        // X-axis labels
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            data.forEach { item ->
+                Text(
+                    text = item.label,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun RecentCompaniesTable(
+    companies: List<CompanyTableData>
+) {
+    Column {
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Company",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(2f)
+            )
+            Text(
+                text = "Status",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "Date",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.End
+            )
+        }
+        
+        // Rows
+        companies.forEach { company ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = company.name,
+                    fontSize = 14.sp,
+                    modifier = Modifier.weight(2f)
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = company.status,
+                        fontSize = 12.sp,
+                        color = when (company.status) {
+                            "Active" -> Color(0xFF4CAF50)
+                            "Inactive" -> Color(0xFFF44336)
+                            "Pending" -> Color(0xFFFF9800)
+                            else -> MaterialTheme.colorScheme.onSurface
+                        },
+                        modifier = Modifier
+                            .background(
+                                when (company.status) {
+                                    "Active" -> Color(0xFF4CAF50).copy(alpha = 0.1f)
+                                    "Inactive" -> Color(0xFFF44336).copy(alpha = 0.1f)
+                                    "Pending" -> Color(0xFFFF9800).copy(alpha = 0.1f)
+                                    else -> MaterialTheme.colorScheme.surface
+                                },
+                                RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+                
+                Text(
+                    text = company.date,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.End
+                )
+            }
+            
+            Divider(
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                thickness = 0.5.dp
+            )
+        }
     }
 }
