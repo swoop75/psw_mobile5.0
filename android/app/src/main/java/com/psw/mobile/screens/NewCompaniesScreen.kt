@@ -75,7 +75,8 @@ fun NewCompaniesScreen(
                     }
                 }
                 is NewCompaniesUiState.Success -> {
-                    val newCompanies = uiState.companies
+                    val successState = uiState as NewCompaniesUiState.Success
+                    val newCompanies = successState.companies
                     Text(
                         text = "${newCompanies.size} companies pending review",
                         fontSize = 14.sp,

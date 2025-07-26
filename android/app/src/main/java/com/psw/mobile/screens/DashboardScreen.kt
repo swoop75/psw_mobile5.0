@@ -105,7 +105,8 @@ fun DashboardScreen(
                         }
                     }
                     is DashboardUiState.Success -> {
-                        val stats = uiState.stats
+                        val successState = uiState as DashboardUiState.Success
+                        val stats = successState.stats
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

@@ -70,7 +70,8 @@ fun MasterlistScreen(
                     }
                 }
                 is MasterlistUiState.Success -> {
-                    val companies = uiState.companies
+                    val successState = uiState as MasterlistUiState.Success
+                    val companies = successState.companies
                     Text(
                         text = "${companies.size} companies found",
                         fontSize = 14.sp,
