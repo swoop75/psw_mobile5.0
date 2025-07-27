@@ -73,8 +73,23 @@ router.get('/new',
   async (req, res) => {
     try {
       const search = req.query.search;
-      let whereClause = 'WHERE default_status IS NULL';
+      const statusFilter = req.query.status; // 'pending', 'all', 'active', 'inactive'
+      
+      let whereClause = '';
       let params = [];
+      
+      // Status filtering
+      if (!statusFilter || statusFilter === 'pending') {
+        whereClause = 'WHERE new_companies_status_id IS NULL';
+      } else if (statusFilter === 'active') {
+        whereClause = 'WHERE new_companies_status_id = 1';
+      } else if (statusFilter === 'inactive') {
+        whereClause = 'WHERE new_companies_status_id = 3';
+      } else if (statusFilter === 'all') {
+        whereClause = 'WHERE 1=1'; // Show all records
+      } else {
+        whereClause = 'WHERE new_companies_status_id IS NULL'; // Default to pending
+      }
       
       if (search) {
         whereClause += ' AND (company LIKE ? OR country_name LIKE ? OR comments LIKE ?)';
@@ -94,10 +109,10 @@ router.get('/new',
             WHEN new_companies_status_id = 1 THEN 'Active'
             WHEN new_companies_status_id = 2 THEN 'Pending'
             WHEN new_companies_status_id = 3 THEN 'Inactive'
-            ELSE 'Unknown'
+            ELSE 'Pending'
           END as status,
-          COALESCE(added_by, 'Unknown User') as submittedBy,
-          DATE_FORMAT(COALESCE(added_date, NOW()), '%Y-%m-%d') as submittedDate,
+          'System User' as submittedBy,
+          DATE_FORMAT(NOW(), '%Y-%m-%d') as submittedDate,
           '' as contactEmail,
           ticker,
           COALESCE(yield, 0) as yield_percent
@@ -209,28 +224,24 @@ router.post('/action',
       const userId = req.user.id;
       
       if (action === 'approve') {
-        // Update default_status to 'approved'
+        // Update new_companies_status_id to 1 (Active)
         await database.query(`
           UPDATE new_companies 
-          SET default_status = 'approved', 
-              approved_by = ?, 
-              approved_date = NOW()
+          SET new_companies_status_id = 1
           WHERE new_company_id = ?
-        `, [userId, companyId], 'portfolio');
+        `, [companyId], 'portfolio');
         
         res.json({
           success: true,
           message: 'Company approved successfully'
         });
       } else if (action === 'reject') {
-        // Update default_status to 'rejected'
+        // Update new_companies_status_id to 3 (Inactive)
         await database.query(`
           UPDATE new_companies 
-          SET default_status = 'rejected', 
-              rejected_by = ?, 
-              rejected_date = NOW()
+          SET new_companies_status_id = 3
           WHERE new_company_id = ?
-        `, [userId, companyId], 'portfolio');
+        `, [companyId], 'portfolio');
         
         res.json({
           success: true,

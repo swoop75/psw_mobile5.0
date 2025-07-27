@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -66,14 +67,17 @@ fun NewCompaniesScreen(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Search bar
+            // Search and filter controls
             var searchText by remember { mutableStateOf("") }
+            var selectedStatus by remember { mutableStateOf("pending") }
+            var showStatusDropdown by remember { mutableStateOf(false) }
             
+            // Search bar
             OutlinedTextField(
                 value = searchText,
                 onValueChange = { 
                     searchText = it
-                    newCompaniesViewModel.searchCompanies(it)
+                    newCompaniesViewModel.searchCompanies(it, selectedStatus)
                 },
                 label = { Text("Search companies...") },
                 leadingIcon = {
@@ -81,9 +85,75 @@ fun NewCompaniesScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 8.dp),
                 singleLine = true
             )
+            
+            // Status filter
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                Text("Status:", fontSize = 14.sp)
+                
+                Box {
+                    OutlinedButton(
+                        onClick = { showStatusDropdown = true }
+                    ) {
+                        Text(
+                            when (selectedStatus) {
+                                "pending" -> "Pending"
+                                "active" -> "Active"
+                                "inactive" -> "Inactive"
+                                "all" -> "All"
+                                else -> "Pending"
+                            }
+                        )
+                    }
+                    
+                    DropdownMenu(
+                        expanded = showStatusDropdown,
+                        onDismissRequest = { showStatusDropdown = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Pending") },
+                            onClick = {
+                                selectedStatus = "pending"
+                                showStatusDropdown = false
+                                newCompaniesViewModel.filterByStatus("pending")
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Active") },
+                            onClick = {
+                                selectedStatus = "active"
+                                showStatusDropdown = false
+                                newCompaniesViewModel.filterByStatus("active")
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Inactive") },
+                            onClick = {
+                                selectedStatus = "inactive"
+                                showStatusDropdown = false
+                                newCompaniesViewModel.filterByStatus("inactive")
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("All") },
+                            onClick = {
+                                selectedStatus = "all"
+                                showStatusDropdown = false
+                                newCompaniesViewModel.filterByStatus("all")
+                            }
+                        )
+                    }
+                }
+            }
             
             when (uiState) {
                 is NewCompaniesUiState.Loading -> {
