@@ -29,6 +29,8 @@ fun NewCompaniesScreen(
     newCompaniesViewModel: NewCompaniesViewModel = viewModel()
 ) {
     val uiState by newCompaniesViewModel.uiState.collectAsState()
+    val brokers by newCompaniesViewModel.brokers.collectAsState()
+    val countries by newCompaniesViewModel.countries.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -111,8 +113,9 @@ fun NewCompaniesScreen(
                         Text(
                             when (selectedStatus) {
                                 "pending" -> "Pending"
-                                "active" -> "Active"
-                                "inactive" -> "Inactive"
+                                "bought" -> "Bought"
+                                "blocked" -> "Blocked"
+                                "no" -> "No"
                                 "all" -> "All"
                                 else -> "Pending"
                             },
@@ -124,7 +127,13 @@ fun NewCompaniesScreen(
                         expanded = showStatusDropdown,
                         onDismissRequest = { showStatusDropdown = false }
                     ) {
-                        listOf("pending" to "Pending", "active" to "Active", "inactive" to "Inactive", "all" to "All").forEach { (value, label) ->
+                        listOf(
+                            "pending" to "Pending", 
+                            "bought" to "Bought", 
+                            "blocked" to "Blocked", 
+                            "no" to "No", 
+                            "all" to "All"
+                        ).forEach { (value, label) ->
                             DropdownMenuItem(
                                 text = { Text(label) },
                                 onClick = {
@@ -158,7 +167,12 @@ fun NewCompaniesScreen(
                             onClick = { showBrokerDropdown = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("All Brokers", fontSize = 12.sp)
+                            Text(
+                                if (selectedBroker == "all") "All Brokers" else {
+                                    brokers.find { it.id == selectedBroker }?.name ?: "All Brokers"
+                                },
+                                fontSize = 12.sp
+                            )
                         }
                         
                         DropdownMenu(
@@ -178,6 +192,21 @@ fun NewCompaniesScreen(
                                     )
                                 }
                             )
+                            brokers.forEach { broker ->
+                                DropdownMenuItem(
+                                    text = { Text(broker.name) },
+                                    onClick = {
+                                        selectedBroker = broker.id
+                                        showBrokerDropdown = false
+                                        newCompaniesViewModel.applyFilters(
+                                            search = if (searchText.isBlank()) null else searchText,
+                                            status = selectedStatus,
+                                            broker = broker.id,
+                                            country = if (selectedCountry == "all") null else selectedCountry
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -190,7 +219,12 @@ fun NewCompaniesScreen(
                             onClick = { showCountryDropdown = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("All Countries", fontSize = 12.sp)
+                            Text(
+                                if (selectedCountry == "all") "All Countries" else {
+                                    countries.find { it.id == selectedCountry }?.name ?: "All Countries"
+                                },
+                                fontSize = 12.sp
+                            )
                         }
                         
                         DropdownMenu(
@@ -210,6 +244,21 @@ fun NewCompaniesScreen(
                                     )
                                 }
                             )
+                            countries.forEach { country ->
+                                DropdownMenuItem(
+                                    text = { Text(country.name) },
+                                    onClick = {
+                                        selectedCountry = country.id
+                                        showCountryDropdown = false
+                                        newCompaniesViewModel.applyFilters(
+                                            search = if (searchText.isBlank()) null else searchText,
+                                            status = selectedStatus,
+                                            broker = if (selectedBroker == "all") null else selectedBroker,
+                                            country = country.id
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
                 }

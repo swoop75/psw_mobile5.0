@@ -18,9 +18,17 @@ class NewCompaniesViewModel(application: Application) : AndroidViewModel(applica
     
     private val _actionState = MutableStateFlow<ActionState>(ActionState.Idle)
     val actionState: StateFlow<ActionState> = _actionState.asStateFlow()
+    
+    private val _brokers = MutableStateFlow<List<Broker>>(emptyList())
+    val brokers: StateFlow<List<Broker>> = _brokers.asStateFlow()
+    
+    private val _countries = MutableStateFlow<List<Country>>(emptyList())
+    val countries: StateFlow<List<Country>> = _countries.asStateFlow()
 
     init {
         loadNewCompanies()
+        loadBrokers()
+        loadCountries()
     }
 
     fun loadNewCompanies(
@@ -43,7 +51,10 @@ class NewCompaniesViewModel(application: Application) : AndroidViewModel(applica
     fun loadBrokers() {
         viewModelScope.launch {
             companyRepository.getBrokers().collect { result ->
-                // Handle broker loading if needed
+                result.fold(
+                    onSuccess = { brokerList -> _brokers.value = brokerList },
+                    onFailure = { /* Handle error silently for now */ }
+                )
             }
         }
     }
@@ -51,7 +62,10 @@ class NewCompaniesViewModel(application: Application) : AndroidViewModel(applica
     fun loadCountries() {
         viewModelScope.launch {
             companyRepository.getCountries().collect { result ->
-                // Handle country loading if needed
+                result.fold(
+                    onSuccess = { countryList -> _countries.value = countryList },
+                    onFailure = { /* Handle error silently for now */ }
+                )
             }
         }
     }

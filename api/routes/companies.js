@@ -77,42 +77,42 @@ router.get('/new',
       const brokerFilter = req.query.broker;
       const countryFilter = req.query.country;
       
-      let whereClause = '';
+      let whereClause = 'WHERE 1=1';
       let params = [];
       
-      // Status filtering
+      // Status filtering - default show only companies with no status (NULL)
       if (!statusFilter || statusFilter === 'pending') {
-        whereClause = 'WHERE new_companies_status_id IS NULL';
-      } else if (statusFilter === 'active') {
-        whereClause = 'WHERE new_companies_status_id = 1';
-      } else if (statusFilter === 'inactive') {
-        whereClause = 'WHERE new_companies_status_id = 3';
+        whereClause += ' AND nc.new_companies_status_id IS NULL';
+      } else if (statusFilter === 'bought') {
+        whereClause += ' AND nc.new_companies_status_id = 1';
+      } else if (statusFilter === 'blocked') {
+        whereClause += ' AND nc.new_companies_status_id = 2';
+      } else if (statusFilter === 'no') {
+        whereClause += ' AND nc.new_companies_status_id = 3';
       } else if (statusFilter === 'all') {
-        whereClause = 'WHERE 1=1'; // Show all records
-      } else {
-        whereClause = 'WHERE new_companies_status_id IS NULL'; // Default to pending
+        // Show all records - no additional filter
       }
       
-      // Broker filtering
+      // Broker filtering by broker_id
       if (brokerFilter && brokerFilter !== 'all') {
-        whereClause += ' AND broker_id = ?';
+        whereClause += ' AND nc.broker_id = ?';
         params.push(brokerFilter);
       }
       
-      // Country filtering
+      // Country filtering by country_name
       if (countryFilter && countryFilter !== 'all') {
-        whereClause += ' AND country_id = ?';
+        whereClause += ' AND nc.country_name = ?';
         params.push(countryFilter);
       }
       
       // Search filtering
       if (search) {
-        whereClause += ' AND (company LIKE ? OR country_name LIKE ? OR comments LIKE ?)';
+        whereClause += ' AND (nc.company LIKE ? OR nc.country_name LIKE ? OR nc.comments LIKE ?)';
         const searchParam = `%${search}%`;
         params.push(searchParam, searchParam, searchParam);
       }
       
-      // Fetch from new_companies table with broker and country info
+      // Fetch from new_companies table with proper joins
       const companies = await database.query(`
         SELECT 
           nc.new_company_id as id,
@@ -120,22 +120,17 @@ router.get('/new',
           'Investment' as industry,
           COALESCE(nc.country_name, 'Unknown') as location,
           COALESCE(nc.comments, '') as description,
-          CASE 
-            WHEN nc.new_companies_status_id = 1 THEN 'Active'
-            WHEN nc.new_companies_status_id = 2 THEN 'Pending'
-            WHEN nc.new_companies_status_id = 3 THEN 'Inactive'
-            ELSE 'Pending'
-          END as status,
+          COALESCE(ncs.status, 'Pending') as status,
           'System User' as submittedBy,
           DATE_FORMAT(NOW(), '%Y-%m-%d') as submittedDate,
           '' as contactEmail,
           nc.ticker,
           COALESCE(nc.yield, 0) as yield_percent,
           COALESCE(b.broker_name, 'Unknown') as brokerName,
-          COALESCE(ci.name, nc.country_name, 'Unknown') as countryName
+          COALESCE(nc.country_name, 'Unknown') as countryName
         FROM new_companies nc
         LEFT JOIN brokers b ON nc.broker_id = b.broker_id
-        LEFT JOIN country_info ci ON nc.country_id = ci.id
+        LEFT JOIN new_companies_status ncs ON nc.new_companies_status_id = ncs.id
         ${whereClause}
         ORDER BY nc.company ASC
         LIMIT 50
@@ -227,11 +222,11 @@ router.get('/filters/brokers',
   async (req, res) => {
     try {
       const brokers = await database.query(`
-        SELECT DISTINCT b.broker_id as id, b.broker_name as name
-        FROM brokers b
-        INNER JOIN new_companies nc ON b.broker_id = nc.broker_id
+        SELECT DISTINCT nc.broker_id as id, COALESCE(b.broker_name, CONCAT('Broker ', nc.broker_id)) as name
+        FROM new_companies nc
+        LEFT JOIN brokers b ON nc.broker_id = b.broker_id
         WHERE nc.broker_id IS NOT NULL
-        ORDER BY b.broker_name
+        ORDER BY name
       `, [], 'portfolio');
       
       res.json({
@@ -254,11 +249,10 @@ router.get('/filters/countries',
   async (req, res) => {
     try {
       const countries = await database.query(`
-        SELECT DISTINCT ci.id, COALESCE(ci.name, nc.country_name) as name
+        SELECT DISTINCT nc.country_name as id, nc.country_name as name
         FROM new_companies nc
-        LEFT JOIN country_info ci ON nc.country_id = ci.id
-        WHERE nc.country_name IS NOT NULL OR nc.country_id IS NOT NULL
-        ORDER BY name
+        WHERE nc.country_name IS NOT NULL AND nc.country_name != ''
+        ORDER BY nc.country_name
       `, [], 'portfolio');
       
       res.json({
