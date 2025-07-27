@@ -112,29 +112,11 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Biometric authentication button
-        val context = LocalContext.current
-        
-        // Always show biometric button for testing - remove this check later if needed
+        // TEST BUTTON - Simple biometric button
         OutlinedButton(
             onClick = {
-                if (context is FragmentActivity) {
-                    val biometricManager = BiometricAuthManager(context)
-                    biometricManager.authenticateWithBiometric(
-                        onSuccess = {
-                            // Auto-login with saved credentials
-                            loginViewModel.login("swoop", "the_real_password")
-                        },
-                        onError = { error ->
-                            // Handle error - could show a snackbar
-                            println("Biometric error: $error")
-                        },
-                        onFailed = {
-                            // Authentication failed - do nothing, user can try again
-                            println("Biometric authentication failed")
-                        }
-                    )
-                }
+                // For now, just auto-login to test
+                loginViewModel.login("swoop", "the_real_password")
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -145,7 +127,7 @@ fun LoginScreen(
                 contentDescription = "Biometric Login",
                 modifier = Modifier.padding(end = 8.dp)
             )
-            Text("Login with Biometric")
+            Text("🔐 Quick Login (Test)")
         }
         
         Spacer(modifier = Modifier.height(16.dp))
