@@ -103,10 +103,10 @@ fun NewCompaniesScreen(
             ) {
                 Text("Status:", fontSize = 12.sp, modifier = Modifier.width(60.dp))
                 
-                Box {
+                Box(modifier = Modifier.weight(1f)) {
                     OutlinedButton(
                         onClick = { showStatusDropdown = true },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
                             when (selectedStatus) {
