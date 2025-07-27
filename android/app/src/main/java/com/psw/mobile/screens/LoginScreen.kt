@@ -148,12 +148,5 @@ fun LoginScreen(
             Text("🔐 Biometric Login")
         }
         
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Text(
-            text = "Demo: admin / password",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 12.sp
-        )
     }
 }
