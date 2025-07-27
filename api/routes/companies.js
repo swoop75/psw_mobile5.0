@@ -17,13 +17,14 @@ router.get('/masterlist', async (req, res) => {
       SELECT 
         isin as id,
         name,
-        COALESCE(sector, 'Unknown') as industry,
+        COALESCE(market, 'Unknown') as industry,
         COALESCE(country, 'Unknown') as location,
-        'Active' as status,
+        CASE WHEN delisted = 1 THEN 'Inactive' ELSE 'Active' END as status,
         ticker,
-        COALESCE(description, '') as description,
-        COALESCE(website, '') as website
+        '' as description,
+        '' as website
       FROM masterlist 
+      WHERE current_version = 1 AND (delisted = 0 OR delisted IS NULL)
       ORDER BY name
       LIMIT 50
     `, [], 'foundation');
