@@ -72,32 +72,30 @@ router.get('/new',
   auth,
   async (req, res) => {
     try {
-      // For now, return some sample pending companies
-      // In the future, you could create a "pending_companies" table
-      const companies = [
-        {
-          id: "PENDING001",
-          name: "Spotify Technology",
-          industry: "Media & Entertainment",
-          location: "Sweden",
-          description: "Music streaming service",
-          status: "Pending",
-          submittedBy: "admin",
-          submittedDate: "2025-01-20",
-          contactEmail: "info@spotify.com"
-        },
-        {
-          id: "PENDING002",
-          name: "Cloudflare Inc.",
-          industry: "Technology", 
-          location: "USA",
-          description: "Web infrastructure and security services",
-          status: "Pending",
-          submittedBy: "admin",
-          submittedDate: "2025-01-19",
-          contactEmail: "info@cloudflare.com"
-        }
-      ];
+      // Fetch from new_companies table in psw_portfolio database
+      const companies = await database.query(`
+        SELECT 
+          new_company_id as id,
+          company as name,
+          'Investment' as industry,
+          COALESCE(country_name, 'Unknown') as location,
+          COALESCE(comments, '') as description,
+          CASE 
+            WHEN new_companies_status_id = 1 THEN 'Active'
+            WHEN new_companies_status_id = 2 THEN 'Pending'
+            WHEN new_companies_status_id = 3 THEN 'Inactive'
+            ELSE 'Unknown'
+          END as status,
+          'system' as submittedBy,
+          DATE_FORMAT(NOW(), '%Y-%m-%d') as submittedDate,
+          '' as contactEmail,
+          ticker,
+          COALESCE(yield, 0) as yield_percent
+        FROM new_companies 
+        WHERE new_companies_status_id IS NOT NULL
+        ORDER BY new_company_id DESC
+        LIMIT 50
+      `, [], 'portfolio');
       
       res.json({
         success: true,
