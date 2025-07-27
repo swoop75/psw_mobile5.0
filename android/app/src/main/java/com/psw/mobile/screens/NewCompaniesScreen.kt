@@ -194,7 +194,7 @@ fun NewCompaniesScreen(
                                     )
                                 }
                             )
-                            brokers.forEach { broker: Broker ->
+                            for (broker in brokers) {
                                 DropdownMenuItem(
                                     text = { Text(broker.name) },
                                     onClick = {
@@ -246,7 +246,7 @@ fun NewCompaniesScreen(
                                     )
                                 }
                             )
-                            countries.forEach { country: Country ->
+                            for (country in countries) {
                                 DropdownMenuItem(
                                     text = { Text(country.name) },
                                     onClick = {
