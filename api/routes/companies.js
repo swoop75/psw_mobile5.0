@@ -12,24 +12,19 @@ router.get('/test', (req, res) => {
 // Masterlist endpoint - fetch from database
 router.get('/masterlist', async (req, res) => {
   try {
-    // Try to fetch from new_companies table first
+    // Fetch from masterlist table
     const companies = await database.query(`
       SELECT 
-        id,
-        company_name as name,
-        COALESCE(industry, 'Unknown') as industry,
-        COALESCE(country_name, 'Unknown') as location,
-        CASE 
-          WHEN new_companies_status_id = 1 THEN 'Active'
-          WHEN new_companies_status_id = 2 THEN 'Pending'
-          WHEN new_companies_status_id = 3 THEN 'Inactive'
-          ELSE 'Unknown'
-        END as status,
-        description,
-        website
-      FROM new_companies 
-      WHERE new_companies_status_id = 1
-      ORDER BY company_name
+        isin as id,
+        name,
+        COALESCE(sector, 'Unknown') as industry,
+        COALESCE(country, 'Unknown') as location,
+        'Active' as status,
+        ticker,
+        COALESCE(description, '') as description,
+        COALESCE(website, '') as website
+      FROM masterlist 
+      ORDER BY name
       LIMIT 50
     `, [], 'foundation');
     
@@ -76,24 +71,32 @@ router.get('/new',
   auth,
   async (req, res) => {
     try {
-      // Fetch pending companies from database
-      const companies = await database.query(`
-        SELECT 
-          id,
-          company_name as name,
-          COALESCE(industry, 'Unknown') as industry,
-          COALESCE(country_name, 'Unknown') as location,
-          description,
-          'Pending' as status,
-          COALESCE(created_by, 'Unknown') as submittedBy,
-          DATE_FORMAT(created_at, '%Y-%m-%d') as submittedDate,
-          contact_email as contactEmail,
-          website
-        FROM new_companies 
-        WHERE new_companies_status_id = 2
-        ORDER BY created_at DESC
-        LIMIT 50
-      `, [], 'foundation');
+      // For now, return some sample pending companies
+      // In the future, you could create a "pending_companies" table
+      const companies = [
+        {
+          id: "PENDING001",
+          name: "Spotify Technology",
+          industry: "Media & Entertainment",
+          location: "Sweden",
+          description: "Music streaming service",
+          status: "Pending",
+          submittedBy: "admin",
+          submittedDate: "2025-01-20",
+          contactEmail: "info@spotify.com"
+        },
+        {
+          id: "PENDING002",
+          name: "Cloudflare Inc.",
+          industry: "Technology", 
+          location: "USA",
+          description: "Web infrastructure and security services",
+          status: "Pending",
+          submittedBy: "admin",
+          submittedDate: "2025-01-19",
+          contactEmail: "info@cloudflare.com"
+        }
+      ];
       
       res.json({
         success: true,
