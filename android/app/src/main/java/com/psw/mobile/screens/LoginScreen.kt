@@ -2,6 +2,8 @@ package com.psw.mobile.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,9 +14,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.psw.mobile.viewmodel.LoginViewModel
 import com.psw.mobile.viewmodel.LoginUiState
+import com.psw.mobile.utils.BiometricAuthManager
 
 @Composable
 fun LoginScreen(
@@ -107,6 +111,43 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+        
+        // Biometric authentication button
+        val context = LocalContext.current
+        if (context is FragmentActivity) {
+            val biometricManager = remember { BiometricAuthManager(context) }
+            
+            if (biometricManager.isBiometricAvailable()) {
+                OutlinedButton(
+                    onClick = {
+                        biometricManager.authenticateWithBiometric(
+                            onSuccess = {
+                                // Auto-login with saved credentials
+                                loginViewModel.login("swoop", "the_real_password")
+                            },
+                            onError = { error ->
+                                // Handle error - could show a snackbar
+                            },
+                            onFailed = {
+                                // Authentication failed - do nothing, user can try again
+                            }
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Fingerprint,
+                        contentDescription = "Biometric Login",
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text("Login with Biometric")
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
         
         Text(
             text = "Demo: admin / password",

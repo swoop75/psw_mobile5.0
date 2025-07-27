@@ -93,7 +93,7 @@ router.get('/new',
           COALESCE(yield, 0) as yield_percent
         FROM new_companies 
         WHERE new_companies_status_id IS NOT NULL
-        ORDER BY new_company_id DESC
+        ORDER BY company ASC
         LIMIT 50
       `, [], 'portfolio');
       
