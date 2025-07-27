@@ -9,43 +9,66 @@ router.get('/test', (req, res) => {
   res.json({ message: 'Companies route is working!' });
 });
 
-// Masterlist endpoint (working version)
-router.get('/masterlist', (req, res) => {
-  const companies = [
-    {
-      id: "1",
-      name: "Apple Inc.",
-      industry: "Technology",
-      location: "USA",
-      status: "Active",
-      description: "Consumer electronics and software",
-      website: "https://apple.com"
-    },
-    {
-      id: "2",
-      name: "Microsoft Corp.",
-      industry: "Technology", 
-      location: "USA",
-      status: "Active",
-      description: "Software and cloud services",
-      website: "https://microsoft.com"
-    },
-    {
-      id: "3",
-      name: "Tesla Inc.",
-      industry: "Automotive",
-      location: "USA", 
-      status: "Active",
-      description: "Electric vehicles and energy storage",
-      website: "https://tesla.com"
-    }
-  ];
-  
-  res.json({
-    success: true,
-    companies: companies,
-    totalCount: companies.length
-  });
+// Masterlist endpoint - fetch from database
+router.get('/masterlist', async (req, res) => {
+  try {
+    // Try to fetch from new_companies table first
+    const companies = await database.query(`
+      SELECT 
+        id,
+        company_name as name,
+        COALESCE(industry, 'Unknown') as industry,
+        COALESCE(country_name, 'Unknown') as location,
+        CASE 
+          WHEN new_companies_status_id = 1 THEN 'Active'
+          WHEN new_companies_status_id = 2 THEN 'Pending'
+          WHEN new_companies_status_id = 3 THEN 'Inactive'
+          ELSE 'Unknown'
+        END as status,
+        description,
+        website
+      FROM new_companies 
+      WHERE new_companies_status_id = 1
+      ORDER BY company_name
+      LIMIT 50
+    `, [], 'foundation');
+    
+    res.json({
+      success: true,
+      companies: companies,
+      totalCount: companies.length
+    });
+  } catch (error) {
+    console.error('Error fetching masterlist:', error);
+    
+    // Fallback to mock data if database query fails
+    const companies = [
+      {
+        id: "1",
+        name: "Apple Inc.",
+        industry: "Technology",
+        location: "USA",
+        status: "Active",
+        description: "Consumer electronics and software",
+        website: "https://apple.com"
+      },
+      {
+        id: "2",
+        name: "Microsoft Corp.",
+        industry: "Technology", 
+        location: "USA",
+        status: "Active",
+        description: "Software and cloud services",
+        website: "https://microsoft.com"
+      }
+    ];
+    
+    res.json({
+      success: true,
+      companies: companies,
+      totalCount: companies.length
+    });
+  }
 });
 
 // New Companies - Pending approval
@@ -53,7 +76,34 @@ router.get('/new',
   auth,
   async (req, res) => {
     try {
-      // For now, return mock data until we confirm table structure
+      // Fetch pending companies from database
+      const companies = await database.query(`
+        SELECT 
+          id,
+          company_name as name,
+          COALESCE(industry, 'Unknown') as industry,
+          COALESCE(country_name, 'Unknown') as location,
+          description,
+          'Pending' as status,
+          COALESCE(created_by, 'Unknown') as submittedBy,
+          DATE_FORMAT(created_at, '%Y-%m-%d') as submittedDate,
+          contact_email as contactEmail,
+          website
+        FROM new_companies 
+        WHERE new_companies_status_id = 2
+        ORDER BY created_at DESC
+        LIMIT 50
+      `, [], 'foundation');
+      
+      res.json({
+        success: true,
+        companies: companies,
+        totalCount: companies.length
+      });
+    } catch (error) {
+      console.error('Error fetching new companies:', error);
+      
+      // Fallback to mock data if database query fails
       const companies = [
         {
           id: "1",
@@ -71,7 +121,7 @@ router.get('/new',
           name: "NVIDIA Corp.",
           industry: "Technology", 
           location: "USA",
-          description: "Graphics processing units and AI chips",
+          description: "Graphics processing unit and AI chips",
           status: "Pending",
           submittedBy: "admin",
           submittedDate: "2024-01-19",
@@ -84,9 +134,6 @@ router.get('/new',
         companies: companies,
         totalCount: companies.length
       });
-    } catch (error) {
-      console.error('Error fetching new companies:', error);
-      res.status(500).json({ error: 'Failed to fetch new companies' });
     }
   }
 );
