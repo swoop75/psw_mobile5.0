@@ -123,7 +123,7 @@ fun LoginScreen(
                             // Auto-login with saved credentials after biometric success
                             loginViewModel.login("swoop", "the_real_password")
                         },
-                        onError = { error ->
+                        onError = { _ ->
                             // If biometric fails, just auto-login anyway for convenience
                             loginViewModel.login("swoop", "the_real_password")
                         },
