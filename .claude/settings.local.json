@@ -27,7 +27,9 @@
       "Bash(where java)",
       "Bash(java:*)",
       "Bash(\"C:/Users/laoan/AppData/Local/Android/Sdk/build-tools/34.0.0/aapt.exe\" package -f -m -J gen -S app/src/main/res -M app/src/main/AndroidManifest.xml -I \"C:/Users/laoan/AppData/Local/Android/Sdk/platforms/android-34/android.jar\")",
-      "Bash(pm2 restart:*)"
+      "Bash(pm2 restart:*)",
+      "Bash(grep:*)",
+      "Bash(npm start)"
     ],
     "deny": []
   }
