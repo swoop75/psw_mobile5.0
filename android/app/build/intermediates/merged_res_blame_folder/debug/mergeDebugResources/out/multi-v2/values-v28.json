@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.psw.mobile.app-mergeDebugResources-58:/values-v28/values-v28.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\laoan\\.gradle\\caches\\8.13\\transforms\\c64f04c8963d51e34f99819b07c17c82\\transformed\\appcompat-1.6.1\\res\\values-v28\\values-v28.xml",
+                    "from": {
+                        "startLines": "2,3,4,8",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,130,217,397",
+                        "endLines": "2,3,7,11",
+                        "endColumns": "74,86,12,12",
+                        "endOffsets": "125,212,392,584"
+                    }
+                }
+            ]
+        }
+    ]
+}

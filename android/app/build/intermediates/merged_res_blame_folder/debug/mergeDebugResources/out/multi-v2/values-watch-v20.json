@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.psw.mobile.app-mergeDebugResources-58:/values-watch-v20/values-watch-v20.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\laoan\\.gradle\\caches\\8.13\\transforms\\c64f04c8963d51e34f99819b07c17c82\\transformed\\appcompat-1.6.1\\res\\values-watch-v20\\values-watch-v20.xml",
+                    "from": {
+                        "startLines": "2,5,8",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,214,385",
+                        "endLines": "4,7,10",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "209,380,553"
+                    }
+                }
+            ]
+        }
+    ]
+}

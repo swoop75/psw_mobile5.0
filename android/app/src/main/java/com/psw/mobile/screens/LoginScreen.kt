@@ -114,40 +114,41 @@ fun LoginScreen(
         
         // Biometric authentication button
         val context = LocalContext.current
-        if (context is FragmentActivity) {
-            val biometricManager = remember { BiometricAuthManager(context) }
-            
-            if (biometricManager.isBiometricAvailable()) {
-                OutlinedButton(
-                    onClick = {
-                        biometricManager.authenticateWithBiometric(
-                            onSuccess = {
-                                // Auto-login with saved credentials
-                                loginViewModel.login("swoop", "the_real_password")
-                            },
-                            onError = { error ->
-                                // Handle error - could show a snackbar
-                            },
-                            onFailed = {
-                                // Authentication failed - do nothing, user can try again
-                            }
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Fingerprint,
-                        contentDescription = "Biometric Login",
-                        modifier = Modifier.padding(end = 8.dp)
+        
+        // Always show biometric button for testing - remove this check later if needed
+        OutlinedButton(
+            onClick = {
+                if (context is FragmentActivity) {
+                    val biometricManager = BiometricAuthManager(context)
+                    biometricManager.authenticateWithBiometric(
+                        onSuccess = {
+                            // Auto-login with saved credentials
+                            loginViewModel.login("swoop", "the_real_password")
+                        },
+                        onError = { error ->
+                            // Handle error - could show a snackbar
+                            println("Biometric error: $error")
+                        },
+                        onFailed = {
+                            // Authentication failed - do nothing, user can try again
+                            println("Biometric authentication failed")
+                        }
                     )
-                    Text("Login with Biometric")
                 }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+        ) {
+            Icon(
+                Icons.Default.Fingerprint,
+                contentDescription = "Biometric Login",
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text("Login with Biometric")
         }
+        
+        Spacer(modifier = Modifier.height(16.dp))
         
         Text(
             text = "Demo: admin / password",
