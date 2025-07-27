@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.psw.mobile.data.model.NewCompany
+import com.psw.mobile.data.model.Broker
+import com.psw.mobile.data.model.Country
 import com.psw.mobile.data.repository.CompanyRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
