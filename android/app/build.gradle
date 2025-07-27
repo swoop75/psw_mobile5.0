@@ -24,14 +24,24 @@ android {
         buildConfigField "String", "API_TIMEOUT", "\"30\""
     }
 
+    signingConfigs {
+        debug {
+            storeFile file("debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+    }
+    
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "API_BASE_URL", "\"http://100.117.171.98:3003/api/v1/\""
+            buildConfigField "String", "API_BASE_URL", "\"http://192.168.68.68:3003/api/v1/\""
         }
         debug {
-            buildConfigField "String", "API_BASE_URL", "\"http://100.117.171.98:3003/api/v1/\""
+            buildConfigField "String", "API_BASE_URL", "\"http://192.168.68.68:3003/api/v1/\""
+            signingConfig signingConfigs.debug
         }
     }
     
