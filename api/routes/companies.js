@@ -13,26 +13,38 @@ router.get('/test', (req, res) => {
 router.get('/masterlist', (req, res) => {
   const companies = [
     {
-      id: 1,
-      company_name: "Apple Inc.",
-      ticker: "AAPL",
-      country_name: "USA",
+      id: "1",
+      name: "Apple Inc.",
+      industry: "Technology",
+      location: "USA",
       status: "Active",
-      yield: 0.5
+      description: "Consumer electronics and software",
+      website: "https://apple.com"
     },
     {
-      id: 2,
-      company_name: "Microsoft Corp.",
-      ticker: "MSFT", 
-      country_name: "USA",
+      id: "2",
+      name: "Microsoft Corp.",
+      industry: "Technology", 
+      location: "USA",
       status: "Active",
-      yield: 2.3
+      description: "Software and cloud services",
+      website: "https://microsoft.com"
+    },
+    {
+      id: "3",
+      name: "Tesla Inc.",
+      industry: "Automotive",
+      location: "USA", 
+      status: "Active",
+      description: "Electric vehicles and energy storage",
+      website: "https://tesla.com"
     }
   ];
   
   res.json({
     success: true,
-    companies: companies
+    companies: companies,
+    totalCount: companies.length
   });
 });
 
@@ -44,28 +56,33 @@ router.get('/new',
       // For now, return mock data until we confirm table structure
       const companies = [
         {
-          id: 1,
-          company_name: "Tesla Inc.",
-          ticker: "TSLA",
-          country_name: "USA",
+          id: "1",
+          name: "Spotify Technology",
+          industry: "Media & Entertainment",
+          location: "Sweden",
+          description: "Music streaming service",
           status: "Pending",
-          yield: 0.0,
-          date_added: "2024-01-20"
+          submittedBy: "admin",
+          submittedDate: "2024-01-20",
+          contactEmail: "info@spotify.com"
         },
         {
-          id: 2,
-          company_name: "NVIDIA Corp.",
-          ticker: "NVDA", 
-          country_name: "USA",
+          id: "2",
+          name: "NVIDIA Corp.",
+          industry: "Technology", 
+          location: "USA",
+          description: "Graphics processing units and AI chips",
           status: "Pending",
-          yield: 0.1,
-          date_added: "2024-01-19"
+          submittedBy: "admin",
+          submittedDate: "2024-01-19",
+          contactEmail: "info@nvidia.com"
         }
       ];
       
       res.json({
         success: true,
-        companies: companies
+        companies: companies,
+        totalCount: companies.length
       });
     } catch (error) {
       console.error('Error fetching new companies:', error);
