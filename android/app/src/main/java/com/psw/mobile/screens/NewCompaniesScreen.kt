@@ -21,6 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.psw.mobile.viewmodel.NewCompaniesViewModel
 import com.psw.mobile.viewmodel.NewCompaniesUiState
 import com.psw.mobile.data.model.NewCompany
+import com.psw.mobile.data.model.Broker
+import com.psw.mobile.data.model.Country
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -192,7 +194,7 @@ fun NewCompaniesScreen(
                                     )
                                 }
                             )
-                            brokers.forEach { broker ->
+                            brokers.forEach { broker: Broker ->
                                 DropdownMenuItem(
                                     text = { Text(broker.name) },
                                     onClick = {
@@ -244,7 +246,7 @@ fun NewCompaniesScreen(
                                     )
                                 }
                             )
-                            countries.forEach { country ->
+                            countries.forEach { country: Country ->
                                 DropdownMenuItem(
                                     text = { Text(country.name) },
                                     onClick = {
