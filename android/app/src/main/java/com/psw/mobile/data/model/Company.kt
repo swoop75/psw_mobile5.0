@@ -25,7 +25,11 @@ data class NewCompany(
     val website: String? = null,
     val submittedBy: String,
     val submittedDate: String,
-    val status: String = "Pending" // "Pending", "Approved", "Rejected"
+    val status: String = "Pending", // "Pending", "Active", "Inactive"
+    val brokerName: String? = null,
+    val countryName: String? = null,
+    val ticker: String? = null,
+    val yield_percent: Double = 0.0
 )
 
 data class CompanyListResponse(
@@ -42,12 +46,22 @@ data class NewCompanyListResponse(
     val message: String? = null
 )
 
-data class CompanyActionRequest(
-    val companyId: String,
-    val action: String // "approve" or "reject"
+data class Broker(
+    val id: String,
+    val name: String
 )
 
-data class CompanyActionResponse(
+data class Country(
+    val id: String,
+    val name: String
+)
+
+data class BrokersResponse(
     val success: Boolean,
-    val message: String
+    val brokers: List<Broker>
+)
+
+data class CountriesResponse(
+    val success: Boolean,
+    val countries: List<Country>
 )

@@ -34,11 +34,16 @@ class CompanyRepository(private val context: Context) {
         }
     }
     
-    suspend fun getNewCompanies(search: String? = null, status: String? = null): Flow<Result<List<NewCompany>>> = flow {
+    suspend fun getNewCompanies(
+        search: String? = null, 
+        status: String? = null,
+        broker: String? = null,
+        country: String? = null
+    ): Flow<Result<List<NewCompany>>> = flow {
         try {
             val token = tokenManager.getToken()
             if (token != null) {
-                val response = apiService.getNewCompanies("Bearer $token", search, status)
+                val response = apiService.getNewCompanies("Bearer $token", search, status, broker, country)
                 if (response.isSuccessful) {
                     response.body()?.let { newCompanyListResponse ->
                         if (newCompanyListResponse.success) {
@@ -58,22 +63,21 @@ class CompanyRepository(private val context: Context) {
         }
     }
     
-    suspend fun approveCompany(companyId: String): Flow<Result<String>> = flow {
+    suspend fun getBrokers(): Flow<Result<List<Broker>>> = flow {
         try {
             val token = tokenManager.getToken()
             if (token != null) {
-                val request = CompanyActionRequest(companyId, "approve")
-                val response = apiService.performCompanyAction("Bearer $token", request)
+                val response = apiService.getBrokers("Bearer $token")
                 if (response.isSuccessful) {
-                    response.body()?.let { actionResponse ->
-                        if (actionResponse.success) {
-                            emit(Result.success(actionResponse.message))
+                    response.body()?.let { brokersResponse ->
+                        if (brokersResponse.success) {
+                            emit(Result.success(brokersResponse.brokers))
                         } else {
-                            emit(Result.failure(Exception(actionResponse.message)))
+                            emit(Result.failure(Exception("Failed to fetch brokers")))
                         }
                     } ?: emit(Result.failure(Exception("Invalid response")))
                 } else {
-                    emit(Result.failure(Exception("Failed to approve company: ${response.code()}")))
+                    emit(Result.failure(Exception("Failed to fetch brokers: ${response.code()}")))
                 }
             } else {
                 emit(Result.failure(Exception("No auth token")))
@@ -83,22 +87,21 @@ class CompanyRepository(private val context: Context) {
         }
     }
     
-    suspend fun rejectCompany(companyId: String): Flow<Result<String>> = flow {
+    suspend fun getCountries(): Flow<Result<List<Country>>> = flow {
         try {
             val token = tokenManager.getToken()
             if (token != null) {
-                val request = CompanyActionRequest(companyId, "reject")
-                val response = apiService.performCompanyAction("Bearer $token", request)
+                val response = apiService.getCountries("Bearer $token")
                 if (response.isSuccessful) {
-                    response.body()?.let { actionResponse ->
-                        if (actionResponse.success) {
-                            emit(Result.success(actionResponse.message))
+                    response.body()?.let { countriesResponse ->
+                        if (countriesResponse.success) {
+                            emit(Result.success(countriesResponse.countries))
                         } else {
-                            emit(Result.failure(Exception(actionResponse.message)))
+                            emit(Result.failure(Exception("Failed to fetch countries")))
                         }
                     } ?: emit(Result.failure(Exception("Invalid response")))
                 } else {
-                    emit(Result.failure(Exception("Failed to reject company: ${response.code()}")))
+                    emit(Result.failure(Exception("Failed to fetch countries: ${response.code()}")))
                 }
             } else {
                 emit(Result.failure(Exception("No auth token")))

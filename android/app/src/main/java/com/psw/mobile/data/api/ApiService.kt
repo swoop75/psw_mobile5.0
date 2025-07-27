@@ -25,20 +25,22 @@ interface ApiService {
         @Query("limit") limit: Int = 50
     ): Response<CompanyListResponse>
     
-    // New Companies - Pending approval
+    // New Companies
     @GET("companies/new")
     suspend fun getNewCompanies(
         @Header("Authorization") token: String,
         @Query("search") search: String? = null,
         @Query("status") status: String? = null,
+        @Query("broker") broker: String? = null,
+        @Query("country") country: String? = null,
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 50
     ): Response<NewCompanyListResponse>
     
-    // Company Actions
-    @POST("companies/action")
-    suspend fun performCompanyAction(
-        @Header("Authorization") token: String,
-        @Body request: CompanyActionRequest
-    ): Response<CompanyActionResponse>
+    // Filter options
+    @GET("companies/filters/brokers")
+    suspend fun getBrokers(@Header("Authorization") token: String): Response<BrokersResponse>
+    
+    @GET("companies/filters/countries")
+    suspend fun getCountries(@Header("Authorization") token: String): Response<CountriesResponse>
 }

@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.psw.mobile.viewmodel.NewCompaniesViewModel
 import com.psw.mobile.viewmodel.NewCompaniesUiState
-import com.psw.mobile.viewmodel.ActionState
 import com.psw.mobile.data.model.NewCompany
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,22 +29,6 @@ fun NewCompaniesScreen(
     newCompaniesViewModel: NewCompaniesViewModel = viewModel()
 ) {
     val uiState by newCompaniesViewModel.uiState.collectAsState()
-    val actionState by newCompaniesViewModel.actionState.collectAsState()
-    
-    // Show snackbar for action results
-    LaunchedEffect(actionState) {
-        when (actionState) {
-            is ActionState.Success -> {
-                // Could show a snackbar here if needed
-                newCompaniesViewModel.clearActionState()
-            }
-            is ActionState.Error -> {
-                // Could show error snackbar here if needed
-                newCompaniesViewModel.clearActionState()
-            }
-            else -> {}
-        }
-    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -70,14 +53,23 @@ fun NewCompaniesScreen(
             // Search and filter controls
             var searchText by remember { mutableStateOf("") }
             var selectedStatus by remember { mutableStateOf("pending") }
+            var selectedBroker by remember { mutableStateOf("all") }
+            var selectedCountry by remember { mutableStateOf("all") }
             var showStatusDropdown by remember { mutableStateOf(false) }
+            var showBrokerDropdown by remember { mutableStateOf(false) }
+            var showCountryDropdown by remember { mutableStateOf(false) }
             
             // Search bar
             OutlinedTextField(
                 value = searchText,
                 onValueChange = { 
                     searchText = it
-                    newCompaniesViewModel.searchCompanies(it, selectedStatus)
+                    newCompaniesViewModel.applyFilters(
+                        search = it,
+                        status = selectedStatus,
+                        broker = if (selectedBroker == "all") null else selectedBroker,
+                        country = if (selectedCountry == "all") null else selectedCountry
+                    )
                 },
                 label = { Text("Search companies...") },
                 leadingIcon = {
@@ -89,20 +81,32 @@ fun NewCompaniesScreen(
                 singleLine = true
             )
             
-            // Status filter
+            // Filter controls
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.FilterList, contentDescription = "Filter")
-                Text("Status:", fontSize = 14.sp)
+                Text("Filters:", fontSize = 14.sp)
+            }
+            
+            // Status filter
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Status:", fontSize = 12.sp, modifier = Modifier.width(60.dp))
                 
                 Box {
                     OutlinedButton(
-                        onClick = { showStatusDropdown = true }
+                        onClick = { showStatusDropdown = true },
+                        modifier = Modifier.weight(1f)
                     ) {
                         Text(
                             when (selectedStatus) {
@@ -111,7 +115,8 @@ fun NewCompaniesScreen(
                                 "inactive" -> "Inactive"
                                 "all" -> "All"
                                 else -> "Pending"
-                            }
+                            },
+                            fontSize = 12.sp
                         )
                     }
                     
@@ -119,38 +124,93 @@ fun NewCompaniesScreen(
                         expanded = showStatusDropdown,
                         onDismissRequest = { showStatusDropdown = false }
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("Pending") },
-                            onClick = {
-                                selectedStatus = "pending"
-                                showStatusDropdown = false
-                                newCompaniesViewModel.filterByStatus("pending")
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Active") },
-                            onClick = {
-                                selectedStatus = "active"
-                                showStatusDropdown = false
-                                newCompaniesViewModel.filterByStatus("active")
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Inactive") },
-                            onClick = {
-                                selectedStatus = "inactive"
-                                showStatusDropdown = false
-                                newCompaniesViewModel.filterByStatus("inactive")
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("All") },
-                            onClick = {
-                                selectedStatus = "all"
-                                showStatusDropdown = false
-                                newCompaniesViewModel.filterByStatus("all")
-                            }
-                        )
+                        listOf("pending" to "Pending", "active" to "Active", "inactive" to "Inactive", "all" to "All").forEach { (value, label) ->
+                            DropdownMenuItem(
+                                text = { Text(label) },
+                                onClick = {
+                                    selectedStatus = value
+                                    showStatusDropdown = false
+                                    newCompaniesViewModel.applyFilters(
+                                        search = if (searchText.isBlank()) null else searchText,
+                                        status = value,
+                                        broker = if (selectedBroker == "all") null else selectedBroker,
+                                        country = if (selectedCountry == "all") null else selectedCountry
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Broker and Country filters
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Broker filter
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Broker:", fontSize = 12.sp)
+                    Box {
+                        OutlinedButton(
+                            onClick = { showBrokerDropdown = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("All Brokers", fontSize = 12.sp)
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showBrokerDropdown,
+                            onDismissRequest = { showBrokerDropdown = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("All Brokers") },
+                                onClick = {
+                                    selectedBroker = "all"
+                                    showBrokerDropdown = false
+                                    newCompaniesViewModel.applyFilters(
+                                        search = if (searchText.isBlank()) null else searchText,
+                                        status = selectedStatus,
+                                        broker = null,
+                                        country = if (selectedCountry == "all") null else selectedCountry
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+                
+                // Country filter
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Country:", fontSize = 12.sp)
+                    Box {
+                        OutlinedButton(
+                            onClick = { showCountryDropdown = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("All Countries", fontSize = 12.sp)
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showCountryDropdown,
+                            onDismissRequest = { showCountryDropdown = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("All Countries") },
+                                onClick = {
+                                    selectedCountry = "all"
+                                    showCountryDropdown = false
+                                    newCompaniesViewModel.applyFilters(
+                                        search = if (searchText.isBlank()) null else searchText,
+                                        status = selectedStatus,
+                                        broker = if (selectedBroker == "all") null else selectedBroker,
+                                        country = null
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -178,13 +238,7 @@ fun NewCompaniesScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(newCompanies) { company ->
-                            NewCompanyCard(
-                                company = company,
-                                onApprove = { newCompaniesViewModel.approveCompany(company.id) },
-                                onReject = { newCompaniesViewModel.rejectCompany(company.id) },
-                                isLoading = actionState is ActionState.Loading && 
-                                           (actionState as ActionState.Loading).companyId == company.id
-                            )
+                            NewCompanyCard(company = company)
                         }
                     }
                 }
@@ -219,12 +273,7 @@ fun NewCompaniesScreen(
 }
 
 @Composable
-fun NewCompanyCard(
-    company: NewCompany,
-    onApprove: () -> Unit,
-    onReject: () -> Unit,
-    isLoading: Boolean = false
-) {
+fun NewCompanyCard(company: NewCompany) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -273,47 +322,17 @@ fun NewCompanyCard(
                 Column {
                     InfoRow(label = "Industry:", value = company.industry)
                     InfoRow(label = "Location:", value = company.location)
-                }
-                Column {
-                    InfoRow(label = "Submitted by:", value = company.submittedBy)
-                    InfoRow(label = "Date:", value = company.submittedDate)
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = onReject,
-                    modifier = Modifier.weight(1f),
-                    enabled = !isLoading
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(16.dp))
-                    } else {
-                        Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Reject")
+                    company.ticker?.let { 
+                        InfoRow(label = "Ticker:", value = it)
                     }
                 }
-                
-                Button(
-                    onClick = onApprove,
-                    modifier = Modifier.weight(1f),
-                    enabled = !isLoading
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Approve")
+                Column {
+                    InfoRow(label = "Status:", value = company.status)
+                    company.brokerName?.let { 
+                        InfoRow(label = "Broker:", value = it)
+                    }
+                    if (company.yield_percent > 0) {
+                        InfoRow(label = "Yield:", value = "${company.yield_percent}%")
                     }
                 }
             }

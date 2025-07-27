@@ -73,7 +73,9 @@ router.get('/new',
   async (req, res) => {
     try {
       const search = req.query.search;
-      const statusFilter = req.query.status; // 'pending', 'all', 'active', 'inactive'
+      const statusFilter = req.query.status;
+      const brokerFilter = req.query.broker;
+      const countryFilter = req.query.country;
       
       let whereClause = '';
       let params = [];
@@ -91,34 +93,51 @@ router.get('/new',
         whereClause = 'WHERE new_companies_status_id IS NULL'; // Default to pending
       }
       
+      // Broker filtering
+      if (brokerFilter && brokerFilter !== 'all') {
+        whereClause += ' AND broker_id = ?';
+        params.push(brokerFilter);
+      }
+      
+      // Country filtering
+      if (countryFilter && countryFilter !== 'all') {
+        whereClause += ' AND country_id = ?';
+        params.push(countryFilter);
+      }
+      
+      // Search filtering
       if (search) {
         whereClause += ' AND (company LIKE ? OR country_name LIKE ? OR comments LIKE ?)';
         const searchParam = `%${search}%`;
-        params = [searchParam, searchParam, searchParam];
+        params.push(searchParam, searchParam, searchParam);
       }
       
-      // Fetch from new_companies table in psw_portfolio database
+      // Fetch from new_companies table with broker and country info
       const companies = await database.query(`
         SELECT 
-          new_company_id as id,
-          company as name,
+          nc.new_company_id as id,
+          nc.company as name,
           'Investment' as industry,
-          COALESCE(country_name, 'Unknown') as location,
-          COALESCE(comments, '') as description,
+          COALESCE(nc.country_name, 'Unknown') as location,
+          COALESCE(nc.comments, '') as description,
           CASE 
-            WHEN new_companies_status_id = 1 THEN 'Active'
-            WHEN new_companies_status_id = 2 THEN 'Pending'
-            WHEN new_companies_status_id = 3 THEN 'Inactive'
+            WHEN nc.new_companies_status_id = 1 THEN 'Active'
+            WHEN nc.new_companies_status_id = 2 THEN 'Pending'
+            WHEN nc.new_companies_status_id = 3 THEN 'Inactive'
             ELSE 'Pending'
           END as status,
           'System User' as submittedBy,
           DATE_FORMAT(NOW(), '%Y-%m-%d') as submittedDate,
           '' as contactEmail,
-          ticker,
-          COALESCE(yield, 0) as yield_percent
-        FROM new_companies 
+          nc.ticker,
+          COALESCE(nc.yield, 0) as yield_percent,
+          COALESCE(b.broker_name, 'Unknown') as brokerName,
+          COALESCE(ci.name, nc.country_name, 'Unknown') as countryName
+        FROM new_companies nc
+        LEFT JOIN brokers b ON nc.broker_id = b.broker_id
+        LEFT JOIN country_info ci ON nc.country_id = ci.id
         ${whereClause}
-        ORDER BY company ASC
+        ORDER BY nc.company ASC
         LIMIT 50
       `, params, 'portfolio');
       
@@ -202,57 +221,55 @@ router.get('/stats/summary',
   }
 );
 
-// Company Actions - Approve/Reject
-router.post('/action', 
+// Get available brokers for filtering
+router.get('/filters/brokers', 
   auth,
-  [
-    body('companyId').notEmpty().withMessage('Company ID is required'),
-    body('action').isIn(['approve', 'reject']).withMessage('Action must be approve or reject')
-  ],
   async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: 'Validation errors',
-          errors: errors.array()
-        });
-      }
-
-      const { companyId, action } = req.body;
-      const userId = req.user.id;
+      const brokers = await database.query(`
+        SELECT DISTINCT b.broker_id as id, b.broker_name as name
+        FROM brokers b
+        INNER JOIN new_companies nc ON b.broker_id = nc.broker_id
+        WHERE nc.broker_id IS NOT NULL
+        ORDER BY b.broker_name
+      `, [], 'portfolio');
       
-      if (action === 'approve') {
-        // Update new_companies_status_id to 1 (Active)
-        await database.query(`
-          UPDATE new_companies 
-          SET new_companies_status_id = 1
-          WHERE new_company_id = ?
-        `, [companyId], 'portfolio');
-        
-        res.json({
-          success: true,
-          message: 'Company approved successfully'
-        });
-      } else if (action === 'reject') {
-        // Update new_companies_status_id to 3 (Inactive)
-        await database.query(`
-          UPDATE new_companies 
-          SET new_companies_status_id = 3
-          WHERE new_company_id = ?
-        `, [companyId], 'portfolio');
-        
-        res.json({
-          success: true,
-          message: 'Company rejected successfully'
-        });
-      }
+      res.json({
+        success: true,
+        brokers: brokers
+      });
     } catch (error) {
-      console.error('Error performing company action:', error);
+      console.error('Error fetching brokers:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to perform action on company'
+        message: 'Failed to fetch brokers'
+      });
+    }
+  }
+);
+
+// Get available countries for filtering
+router.get('/filters/countries', 
+  auth,
+  async (req, res) => {
+    try {
+      const countries = await database.query(`
+        SELECT DISTINCT ci.id, COALESCE(ci.name, nc.country_name) as name
+        FROM new_companies nc
+        LEFT JOIN country_info ci ON nc.country_id = ci.id
+        WHERE nc.country_name IS NOT NULL OR nc.country_id IS NOT NULL
+        ORDER BY name
+      `, [], 'portfolio');
+      
+      res.json({
+        success: true,
+        countries: countries
+      });
+    } catch (error) {
+      console.error('Error fetching countries:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch countries'
       });
     }
   }

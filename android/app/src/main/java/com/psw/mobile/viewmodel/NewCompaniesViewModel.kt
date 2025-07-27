@@ -23,10 +23,15 @@ class NewCompaniesViewModel(application: Application) : AndroidViewModel(applica
         loadNewCompanies()
     }
 
-    fun loadNewCompanies(search: String? = null, status: String? = null) {
+    fun loadNewCompanies(
+        search: String? = null, 
+        status: String? = null,
+        broker: String? = null,
+        country: String? = null
+    ) {
         viewModelScope.launch {
             _uiState.value = NewCompaniesUiState.Loading
-            companyRepository.getNewCompanies(search, status).collect { result ->
+            companyRepository.getNewCompanies(search, status, broker, country).collect { result ->
                 _uiState.value = result.fold(
                     onSuccess = { companies -> NewCompaniesUiState.Success(companies) },
                     onFailure = { error -> NewCompaniesUiState.Error(error.message ?: "Failed to load new companies") }
@@ -35,38 +40,18 @@ class NewCompaniesViewModel(application: Application) : AndroidViewModel(applica
         }
     }
     
-    fun approveCompany(companyId: String) {
+    fun loadBrokers() {
         viewModelScope.launch {
-            _actionState.value = ActionState.Loading(companyId, "approve")
-            companyRepository.approveCompany(companyId).collect { result ->
-                result.fold(
-                    onSuccess = { message ->
-                        _actionState.value = ActionState.Success(message)
-                        // Reload the list to reflect changes
-                        loadNewCompanies()
-                    },
-                    onFailure = { error ->
-                        _actionState.value = ActionState.Error(error.message ?: "Failed to approve company")
-                    }
-                )
+            companyRepository.getBrokers().collect { result ->
+                // Handle broker loading if needed
             }
         }
     }
     
-    fun rejectCompany(companyId: String) {
+    fun loadCountries() {
         viewModelScope.launch {
-            _actionState.value = ActionState.Loading(companyId, "reject")
-            companyRepository.rejectCompany(companyId).collect { result ->
-                result.fold(
-                    onSuccess = { message ->
-                        _actionState.value = ActionState.Success(message)
-                        // Reload the list to reflect changes
-                        loadNewCompanies()
-                    },
-                    onFailure = { error ->
-                        _actionState.value = ActionState.Error(error.message ?: "Failed to reject company")
-                    }
-                )
+            companyRepository.getCountries().collect { result ->
+                // Handle country loading if needed
             }
         }
     }
@@ -75,13 +60,23 @@ class NewCompaniesViewModel(application: Application) : AndroidViewModel(applica
         _actionState.value = ActionState.Idle
     }
     
-    fun searchCompanies(query: String, status: String? = null) {
+    fun searchCompanies(
+        query: String, 
+        status: String? = null,
+        broker: String? = null,
+        country: String? = null
+    ) {
         val searchQuery = if (query.isBlank()) null else query
-        loadNewCompanies(searchQuery, status)
+        loadNewCompanies(searchQuery, status, broker, country)
     }
     
-    fun filterByStatus(status: String) {
-        loadNewCompanies(status = status)
+    fun applyFilters(
+        search: String? = null,
+        status: String? = null,
+        broker: String? = null,
+        country: String? = null
+    ) {
+        loadNewCompanies(search, status, broker, country)
     }
 }
 
