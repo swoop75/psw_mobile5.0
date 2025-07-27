@@ -34,11 +34,11 @@ class CompanyRepository(private val context: Context) {
         }
     }
     
-    suspend fun getNewCompanies(): Flow<Result<List<NewCompany>>> = flow {
+    suspend fun getNewCompanies(search: String? = null): Flow<Result<List<NewCompany>>> = flow {
         try {
             val token = tokenManager.getToken()
             if (token != null) {
-                val response = apiService.getNewCompanies("Bearer $token")
+                val response = apiService.getNewCompanies("Bearer $token", search)
                 if (response.isSuccessful) {
                     response.body()?.let { newCompanyListResponse ->
                         if (newCompanyListResponse.success) {

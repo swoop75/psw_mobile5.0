@@ -72,6 +72,16 @@ router.get('/new',
   auth,
   async (req, res) => {
     try {
+      const search = req.query.search;
+      let whereClause = 'WHERE default_status IS NULL';
+      let params = [];
+      
+      if (search) {
+        whereClause += ' AND (company LIKE ? OR country_name LIKE ? OR comments LIKE ?)';
+        const searchParam = `%${search}%`;
+        params = [searchParam, searchParam, searchParam];
+      }
+      
       // Fetch from new_companies table in psw_portfolio database
       const companies = await database.query(`
         SELECT 
@@ -86,16 +96,16 @@ router.get('/new',
             WHEN new_companies_status_id = 3 THEN 'Inactive'
             ELSE 'Unknown'
           END as status,
-          'system' as submittedBy,
-          DATE_FORMAT(NOW(), '%Y-%m-%d') as submittedDate,
+          COALESCE(added_by, 'Unknown User') as submittedBy,
+          DATE_FORMAT(COALESCE(added_date, NOW()), '%Y-%m-%d') as submittedDate,
           '' as contactEmail,
           ticker,
           COALESCE(yield, 0) as yield_percent
         FROM new_companies 
-        WHERE new_companies_status_id IS NOT NULL
+        ${whereClause}
         ORDER BY company ASC
         LIMIT 50
-      `, [], 'portfolio');
+      `, params, 'portfolio');
       
       res.json({
         success: true,
@@ -177,6 +187,64 @@ router.get('/stats/summary',
   }
 );
 
-// TEMPORARILY REMOVED /:id route to test other routes
+// Company Actions - Approve/Reject
+router.post('/action', 
+  auth,
+  [
+    body('companyId').notEmpty().withMessage('Company ID is required'),
+    body('action').isIn(['approve', 'reject']).withMessage('Action must be approve or reject')
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation errors',
+          errors: errors.array()
+        });
+      }
+
+      const { companyId, action } = req.body;
+      const userId = req.user.id;
+      
+      if (action === 'approve') {
+        // Update default_status to 'approved'
+        await database.query(`
+          UPDATE new_companies 
+          SET default_status = 'approved', 
+              approved_by = ?, 
+              approved_date = NOW()
+          WHERE new_company_id = ?
+        `, [userId, companyId], 'portfolio');
+        
+        res.json({
+          success: true,
+          message: 'Company approved successfully'
+        });
+      } else if (action === 'reject') {
+        // Update default_status to 'rejected'
+        await database.query(`
+          UPDATE new_companies 
+          SET default_status = 'rejected', 
+              rejected_by = ?, 
+              rejected_date = NOW()
+          WHERE new_company_id = ?
+        `, [userId, companyId], 'portfolio');
+        
+        res.json({
+          success: true,
+          message: 'Company rejected successfully'
+        });
+      }
+    } catch (error) {
+      console.error('Error performing company action:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to perform action on company'
+      });
+    }
+  }
+);
 
 module.exports = router;

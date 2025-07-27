@@ -29,6 +29,7 @@ interface ApiService {
     @GET("companies/new")
     suspend fun getNewCompanies(
         @Header("Authorization") token: String,
+        @Query("search") search: String? = null,
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 50
     ): Response<NewCompanyListResponse>

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -65,6 +66,25 @@ fun NewCompaniesScreen(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            // Search bar
+            var searchText by remember { mutableStateOf("") }
+            
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { 
+                    searchText = it
+                    newCompaniesViewModel.searchCompanies(it)
+                },
+                label = { Text("Search companies...") },
+                leadingIcon = {
+                    Icon(Icons.Default.Search, contentDescription = "Search")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                singleLine = true
+            )
+            
             when (uiState) {
                 is NewCompaniesUiState.Loading -> {
                     Box(

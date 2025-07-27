@@ -23,10 +23,10 @@ class NewCompaniesViewModel(application: Application) : AndroidViewModel(applica
         loadNewCompanies()
     }
 
-    fun loadNewCompanies() {
+    fun loadNewCompanies(search: String? = null) {
         viewModelScope.launch {
             _uiState.value = NewCompaniesUiState.Loading
-            companyRepository.getNewCompanies().collect { result ->
+            companyRepository.getNewCompanies(search).collect { result ->
                 _uiState.value = result.fold(
                     onSuccess = { companies -> NewCompaniesUiState.Success(companies) },
                     onFailure = { error -> NewCompaniesUiState.Error(error.message ?: "Failed to load new companies") }
@@ -73,6 +73,11 @@ class NewCompaniesViewModel(application: Application) : AndroidViewModel(applica
     
     fun clearActionState() {
         _actionState.value = ActionState.Idle
+    }
+    
+    fun searchCompanies(query: String) {
+        val searchQuery = if (query.isBlank()) null else query
+        loadNewCompanies(searchQuery)
     }
 }
 
